@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quadra Cheia – Protótipo</title>
+<style>
+  :root{--g:#6ba84f;--gd:#36552d;--bg:#f3f7f0;--ink:#283128;--line:#dbe6d3;--mut:#6b776a}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#e6ede2;color:var(--ink);min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center}
+  .phone{width:100%;max-width:390px;height:100vh;height:100dvh;max-height:820px;background:#fff;position:relative;overflow:hidden;display:flex;flex-direction:column}
+  @media(min-width:500px){.phone{border-radius:28px;box-shadow:0 12px 40px rgba(40,49,40,.25);border:8px solid var(--ink)}}
+  .appbar{display:none;align-items:center;gap:6px;padding:0 8px 0 12px;height:56px;border-bottom:1px solid var(--line);background:#fff;flex-shrink:0}
+  .appbar h1{font-size:17px;font-weight:700;flex:1}
+  .icon-btn{background:none;border:none;font-size:22px;width:40px;height:40px;border-radius:50%;cursor:pointer;color:var(--ink);position:relative}
+  .icon-btn:active{background:var(--bg)}
+  .bell-badge{position:absolute;top:2px;right:0;min-width:18px;height:18px;border-radius:9px;background:#d64545;color:#fff;font-size:11px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px}
+  .screen{display:none;flex:1;overflow-y:auto;flex-direction:column;padding:20px}
+  .screen.active{display:flex}
+  .nav{display:none;border-top:1px solid var(--line);background:#fff;flex-shrink:0}
+  .nav button{flex:1;background:none;border:none;padding:10px 0 12px;font-size:12px;color:var(--mut);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .nav button span{font-size:20px}
+  .nav button.on{color:var(--gd);font-weight:700}
+  h2{font-size:24px;line-height:1.2;margin-bottom:8px;color:var(--gd)}
+  p.sub{color:var(--mut);font-size:14px;margin-bottom:18px;line-height:1.45}
+  label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+  input,select,textarea{width:100%;padding:13px 12px;border:1.5px solid var(--line);border-radius:12px;font-size:15px;background:#fff;color:var(--ink);font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--g)}
+  input[readonly]{background:#eef0ec;color:#8b948a;border-color:#e3e7e0;cursor:not-allowed}
+  .btn{width:100%;padding:14px;border-radius:12px;border:none;background:var(--g);color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:18px}
+  .btn:active{background:var(--gd)}
+  .btn.sec{background:#fff;color:var(--gd);border:1.5px solid var(--g)}
+  .btn.danger{background:#fff;color:#a33;border:1.5px solid #e3c1c1}
+  .btn.sm{width:auto;padding:10px 14px;font-size:14px;margin-top:0}
+  .link{background:none;border:none;color:var(--gd);font-weight:600;font-size:14px;cursor:pointer;text-decoration:underline;margin-top:14px;align-self:center}
+  .err{color:#b3261e;font-size:13px;margin-top:10px;min-height:16px}
+  .hero{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:10px}
+  .logo{width:84px;height:84px;border-radius:24px;background:var(--g);color:#fff;font-size:34px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;cursor:pointer;color:var(--ink)}
+  .chip.on{background:var(--g);border-color:var(--g);color:#fff;font-weight:600}
+  .card{border:1.5px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;background:#fff;cursor:pointer}
+  .card:active{background:var(--bg)}
+  .card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
+  .tag{font-size:12px;font-weight:700;background:var(--bg);color:var(--gd);padding:4px 10px;border-radius:999px}
+  .card h3{font-size:16px;margin-bottom:4px}
+  .meta{font-size:13px;color:var(--mut);line-height:1.5}
+  .ok{color:var(--gd);font-weight:600}
+  .more{font-size:13px;font-weight:700;color:var(--gd);margin-top:10px}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--gd);font-weight:600}
+  .status{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .st-pending{background:#fff4d6;color:#7a5a00}
+  .st-accepted{background:#dff0d6;color:var(--gd)}
+  .st-declined{background:#f6dcdc;color:#8a2a2a}
+  .photo-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin:6px 0 4px}
+  .photo{width:96px;height:96px;border-radius:50%;background:var(--bg);border:2px dashed var(--g);display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer;overflow:hidden}
+  .photo img{width:100%;height:100%;object-fit:cover}
+  .hint{font-size:13px;color:var(--gd);background:var(--bg);padding:8px 12px;border-radius:10px;text-align:center}
+  .mod-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center}
+  .mod-row .x{background:none;border:none;font-size:18px;color:var(--mut);cursor:pointer;width:32px}
+  .addr-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .range-row{display:flex;align-items:center;gap:10px}
+  .range-row input{padding:0;border:none}
+
+  /* filtros */
+  .filters{background:var(--bg);margin:-20px -20px 14px;padding:14px 20px;border-bottom:1px solid var(--line)}
+  .filters .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .filters .row1{display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px}
+  .ms-btn{width:100%;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:14px;color:var(--ink);cursor:pointer;font-family:inherit;text-align:left}
+  .ms-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ms-btn.has{border-color:var(--g);color:var(--gd);font-weight:600}
+  .ms-btn.open{border-color:var(--g)}
+  .ms-panel{display:none;background:#fff;border:1.5px solid var(--line);border-radius:12px;margin-top:8px;padding:6px 12px}
+  .ms-panel.show{display:block}
+  .ms-panel.two{grid-template-columns:1fr 1fr;column-gap:10px}
+  .ms-panel.two.show{display:grid}
+  .ms-opt{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:14px;cursor:pointer;margin:0;font-weight:500}
+  .ms-opt input{width:20px;height:20px;padding:0;accent-color:#6ba84f;flex-shrink:0}
+  .ms-foot{grid-column:1/-1;display:flex;justify-content:space-between;border-top:1px solid var(--line);padding:8px 0 4px}
+  .ms-foot button{background:none;border:none;font-size:13px;font-weight:700;color:var(--gd);cursor:pointer;padding:4px 0}
+
+  .seg{display:flex;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:14px}
+  .seg button{flex:1;border:none;background:none;padding:10px;border-radius:9px;font-size:14px;color:var(--mut);cursor:pointer}
+  .seg button.on{background:#fff;color:var(--gd);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+  .info-grid div{background:var(--bg);border-radius:12px;padding:10px 12px;font-size:13px}
+  .info-grid b{display:block;font-size:11px;color:var(--mut);font-weight:600;margin-bottom:2px;text-transform:uppercase}
+  .note{font-size:12.5px;color:var(--mut);background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:12px;line-height:1.45}
+  .empty{text-align:center;color:var(--mut);padding:40px 10px;font-size:14px}
+
+  /* criar grupo: partida confirmada */
+  .check-row{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:12px;margin:14px 0 0;cursor:pointer;font-weight:500}
+  .check-row input{width:20px;height:20px;padding:0;accent-color:#6ba84f;flex-shrink:0;margin-top:2px}
+  .check-row b{display:block;font-size:14px}
+  .check-row small{display:block;font-size:12.5px;color:var(--mut);margin-top:2px;line-height:1.4}
+
+  /* notificações */
+  .notif{display:flex;gap:12px;padding:14px;border:1.5px solid var(--line);border-radius:16px;margin-bottom:10px;cursor:pointer;background:#fff}
+  .notif.unread{background:var(--bg);border-color:var(--g)}
+  .notif .ic{width:38px;height:38px;border-radius:50%;background:#fff;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .notif b{display:block;font-size:14px;margin-bottom:2px}
+  .notif .t{font-size:12px;color:var(--mut);margin-top:4px}
+
+  .overlay{position:absolute;inset:0;background:rgba(40,49,40,.45);display:none;z-index:20}
+  .overlay.show{display:block}
+  .drawer{position:absolute;top:0;bottom:0;left:0;width:78%;background:#fff;z-index:21;transform:translateX(-100%);transition:transform .22s;display:flex;flex-direction:column;padding:24px 18px}
+  .drawer.show{transform:none}
+  .drawer .who{padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:8px}
+  .drawer .who b{font-size:17px;display:block}
+  .drawer .who span{font-size:13px;color:var(--mut)}
+  .drawer button.item{background:none;border:none;text-align:left;padding:14px 4px;font-size:16px;cursor:pointer;color:var(--ink)}
+  .modal{position:absolute;left:20px;right:20px;top:50%;transform:translateY(-50%);max-height:85%;overflow-y:auto;background:#fff;border-radius:18px;padding:20px;z-index:31;display:none}
+  .modal.show{display:block}
+  .modal h3{color:var(--gd);margin-bottom:8px}
+  .modal p{font-size:14px;line-height:1.5;margin-bottom:6px}
+  .toast{position:absolute;left:20px;right:20px;bottom:80px;background:var(--ink);color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;z-index:40;opacity:0;pointer-events:none;transition:opacity .2s;text-align:center}
+  .toast.show{opacity:1}
+  .code-input{letter-spacing:10px;text-align:center;font-size:24px}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <div class="appbar" id="appbar">
+    <button class="icon-btn" id="appbarBtn" onclick="appbarAction()">☰</button>
+    <h1 id="appbarTitle"></h1>
+    <button class="icon-btn" id="bellBtn" onclick="go('notifications')" aria-label="Notificações" style="display:none">🔔<span class="bell-badge" id="bellBadge">0</span></button>
+  </div>
+
+  <!-- BOAS-VINDAS -->
+  <section class="screen" id="welcome">
+    <div class="hero">
+      <div class="logo">QC</div>
+      <h2>Quadra Cheia</h2>
+      <p class="sub">Encontre grupos e partidas de vôlei, vôlei de areia, futsal, basquete, handebol e beach tennis perto de você.</p>
+    </div>
+    <button class="btn" onclick="go('signup')">Criar conta</button>
+    <button class="btn sec" onclick="go('login')">Já tenho conta</button>
+  </section>
+
+  <!-- LOGIN -->
+  <section class="screen" id="login">
+    <button class="link" style="align-self:flex-start;margin:0 0 10px" onclick="go('welcome')">← Voltar</button>
+    <h2>Entrar</h2>
+    <p class="sub">Acesse sua conta para ver as vagas disponíveis.</p>
+    <label>E-mail</label>
+    <input id="lgEmail" inputmode="email" autocapitalize="none" placeholder="seu@email.com">
+    <label>Senha</label>
+    <input type="password" id="lgPass" placeholder="Sua senha">
+    <div class="err" id="lgErr"></div>
+    <button class="btn" onclick="doLogin()">Entrar</button>
+  </section>
+
+  <!-- CADASTRO -->
+  <section class="screen" id="signup">
+    <button class="link" style="align-self:flex-start;margin:0 0 10px" onclick="go('welcome')">← Voltar</button>
+    <h2>Criar conta</h2>
+    <p class="sub">Verificamos seu e-mail e telefone para deixar a comunidade mais segura.</p>
+    <label>Nome completo</label>
+    <input id="suName" placeholder="Seu nome">
+    <label>E-mail</label>
+    <input id="suEmail" inputmode="email" autocapitalize="none" placeholder="seu@email.com">
+    <label>Telefone</label>
+    <input id="suPhone" inputmode="numeric" placeholder="(11) 99999-9999" maxlength="15">
+    <label>Senha</label>
+    <input type="password" id="suPass" placeholder="Mínimo 6 caracteres">
+    <div class="err" id="suErr"></div>
+    <button class="btn" onclick="doSignup()">Continuar</button>
+    <div class="note">Seu telefone não aparece para outros usuários. O contato por WhatsApp só é liberado após o aceite do organizador.</div>
+  </section>
+
+  <!-- VERIFICAÇÃO -->
+  <section class="screen" id="verify">
+    <h2>Verifique sua conta</h2>
+    <p class="sub">Enviamos um código de 6 dígitos para seu e-mail e telefone.<br>(Protótipo: use qualquer código com 6 dígitos.)</p>
+    <label>Código</label>
+    <input class="code-input" id="vCode" inputmode="numeric" maxlength="6" placeholder="······">
+    <div class="err" id="vErr"></div>
+    <button class="btn" onclick="doVerify()">Verificar</button>
+    <button class="link" onclick="toast('Novo código enviado')">Reenviar código</button>
+  </section>
+
+  <!-- PERFIL / ONBOARDING -->
+  <section class="screen" id="profile">
+    <h2 id="pfTitle">Monte seu perfil</h2>
+    <p class="sub">Assim os organizadores sabem se você combina com o grupo.</p>
+
+    <div class="photo-wrap">
+      <div class="photo" id="photoBox" onclick="document.getElementById('photoInput').click()">📷</div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+      <div class="hint">Perfis com foto são aceitos mais rápido</div>
+    </div>
+
+    <label for="pfCep">CEP</label>
+    <input id="pfCep" inputmode="numeric" maxlength="9" placeholder="00000-000" oninput="onCepInput(this)">
+
+    <label for="pfStreet">Rua</label>
+    <input id="pfStreet" placeholder="Preenchida pelo CEP" readonly>
+    <div class="addr-row">
+      <div>
+        <label for="pfHood">Bairro</label>
+        <input id="pfHood" placeholder="Preenchido pelo CEP" readonly>
+      </div>
+      <div>
+        <label for="pfCity">Cidade</label>
+        <input id="pfCity" value="São Paulo" readonly>
+      </div>
+    </div>
+    <div class="note">Digite o CEP e o endereço é preenchido automaticamente. Para testar, use 04101-000, 04001-000 ou 05422-000.</div>
+
+    <label>Modalidades e nível</label>
+    <div id="modRows"></div>
+    <button class="btn sec sm" id="addMod" onclick="addMod()" style="margin-top:4px">+ Adicionar modalidade</button>
+
+    <div class="err" id="pfErr"></div>
+    <button class="btn" id="pfBtn" onclick="saveProfile()">Concluir</button>
+  </section>
+
+  <!-- BUSCAR -->
+  <section class="screen" id="search">
+    <div class="filters">
+      <div class="chips" id="sportChips"></div>
+      <div class="row2">
+        <button class="ms-btn" id="msBtn-days" onclick="toggleMs('days')"><span id="msLbl-days">Qualquer dia</span><i>▾</i></button>
+        <button class="ms-btn" id="msBtn-periods" onclick="toggleMs('periods')"><span id="msLbl-periods">Qualquer período</span><i>▾</i></button>
+      </div>
+      <div class="row1">
+        <button class="ms-btn" id="msBtn-levels" onclick="toggleMs('levels')"><span id="msLbl-levels">Qualquer nível</span><i>▾</i></button>
+      </div>
+      <div class="ms-panel two" id="msPanel-days"></div>
+      <div class="ms-panel" id="msPanel-periods"></div>
+      <div class="ms-panel" id="msPanel-levels"></div>
+      <div class="range-row" style="margin-top:12px">
+        <span style="font-size:13px;white-space:nowrap">Até <b id="kmVal">6</b> km</span>
+        <input type="range" id="fKm" min="1" max="10" value="6" oninput="applyFilters()" style="accent-color:#6ba84f">
+      </div>
+    </div>
+    <div id="results"></div>
+  </section>
+
+  <!-- DETALHE DO GRUPO -->
+  <section class="screen" id="group"></section>
+
+  <!-- ATIVIDADE -->
+  <section class="screen" id="activity">
+    <div class="seg">
+      <button id="tabReq" class="on" onclick="setTab('req')">Minhas solicitações</button>
+      <button id="tabMine" onclick="setTab('mine')">Meus grupos</button>
+    </div>
+    <div id="activityList"></div>
+  </section>
+
+  <!-- CRIAR GRUPO -->
+  <section class="screen" id="publish">
+    <h2>Criar grupo</h2>
+    <p class="sub">Organiza uma partida e precisa de mais jogadores? Cadastre seu grupo e receba solicitações de entrada.</p>
+    <div class="note" style="margin-top:0;margin-bottom:6px">Esta área é para quem organiza grupos ou partidas. Para encontrar uma vaga para jogar, use a aba Buscar.</div>
+    <label>Nome do grupo</label>
+    <input id="pbName" placeholder="Ex.: Areia da Vila" maxlength="40">
+    <label>Modalidade</label>
+    <select id="pbSport"><option>Vôlei</option><option>Vôlei de areia</option><option>Futsal</option><option>Basquete</option><option>Handebol</option><option>Beach tennis</option></select>
+    <label>Local (bairro)</label>
+    <input id="pbHood" placeholder="Ex.: Vila Mariana">
+    <label>Dia e horário</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <select id="pbDay"><option>Segunda</option><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option selected>Sábado</option><option>Domingo</option></select>
+      <input type="time" id="pbTime" value="09:00">
+    </div>
+    <label class="check-row" for="pbConfirmed">
+      <input type="checkbox" id="pbConfirmed">
+      <span><b>Partida confirmada</b><small>Marque se a partida já está garantida. Quem buscar verá o selo "Partida confirmada".</small></span>
+    </label>
+    <label>Nível</label>
+    <select id="pbLevel"><option>Iniciante</option><option>Intermediário</option><option>Avançado</option><option>Todos os níveis</option></select>
+    <label>Vagas abertas</label>
+    <input type="number" id="pbSpots" min="1" max="20" value="2" inputmode="numeric">
+    <div class="note">Até 20 vagas por grupo.</div>
+    <label>Custo por pessoa</label>
+    <input id="pbCost" placeholder="Ex.: R$ 15 ou Gratuito">
+    <label>Link da comunidade no WhatsApp (opcional)</label>
+    <input id="pbLink" placeholder="https://chat.whatsapp.com/...">
+    <div class="note">O link fica oculto e só é enviado aos candidatos que você aceitar. Você pode deixar em branco por enquanto.</div>
+    <div class="err" id="pbErr"></div>
+    <button class="btn" onclick="doPublish()">Criar grupo e receber jogadores</button>
+  </section>
+
+  <!-- CANDIDATOS -->
+  <section class="screen" id="candidates"></section>
+
+  <!-- NOTIFICAÇÕES -->
+  <section class="screen" id="notifications">
+    <div id="notifList"></div>
+  </section>
+
+  <nav class="nav" id="nav">
+    <button id="nv-search" onclick="go('search')"><span>🔎</span>Buscar</button>
+    <button id="nv-activity" onclick="go('activity')"><span>📋</span>Atividade</button>
+    <button id="nv-publish" onclick="go('publish')"><span>➕</span>Criar grupo</button>
+  </nav>
+
+  <!-- MENU HAMBÚRGUER -->
+  <div class="overlay" id="overlay" onclick="closeAll()"></div>
+  <div class="drawer" id="drawer">
+    <div class="who"><b id="drName">Atleta</b><span id="drPhone">Quadra Cheia</span></div>
+    <button class="item" onclick="openProfile()">Perfil</button>
+    <button class="item" onclick="closeAll();toast('Configurações disponíveis na versão completa')">Configurações</button>
+    <button class="item" onclick="openHelp()">Ajuda</button>
+    <button class="item" onclick="logout()">Sair</button>
+  </div>
+
+  <div class="modal" id="modal">
+    <h3 id="mTitle"></h3>
+    <div id="mBody"></div>
+    <button class="btn" id="mClose" onclick="closeAll()">Fechar</button>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+/* Escapa texto digitado pelo usuário antes de inserir no HTML (evita injeção de HTML/script) */
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SPORTS=['Vôlei','Vôlei de areia','Futsal','Basquete','Handebol','Beach tennis'];
+const LEVELS=['Iniciante','Intermediário','Avançado'];
+const PERIODS=['Manhã','Tarde','Noite'];
+const DAYS_FULL=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+const DAYS_SHORT={Segunda:'Seg',Terça:'Ter',Quarta:'Qua',Quinta:'Qui',Sexta:'Sex',Sábado:'Sáb',Domingo:'Dom'};
+
+const state={
+  logged:false,editing:false,
+  user:{name:'',email:'',phone:'',cep:'',street:'',hood:'',photo:null,mods:[{sport:'',level:''}],onboarded:false},
+  filters:{sport:'Todos',days:[],periods:[],levels:[],km:6,open:null},
+  requests:[],myGroups:[],notifs:[],tab:'req',currentGroup:null,currentMine:null
+};
+
+const GROUPS=[
+ {id:1,sport:'Vôlei de areia',name:'Areia da Vila',hood:'Vila Mariana',km:1.2,day:'Sábado',time:'09:00',level:'Iniciante',spots:3,cost:'R$ 15 por pessoa',confirmed:true,active:'Partida confirmada há 2 dias',org:'Camila R.',rules:'Chegar 10 min antes. Iniciantes são bem-vindos.'},
+ {id:2,sport:'Vôlei de areia',name:'Quarta na Areia',hood:'Paraíso',km:2.8,day:'Quarta',time:'19:30',level:'Intermediário',spots:2,cost:'R$ 20 por pessoa',confirmed:true,active:'Partida confirmada ontem',org:'Diego M.',rules:'Jogos de 2h. Trazer bola não é obrigatório.'},
+ {id:3,sport:'Vôlei',name:'Vôlei de Quadra Moema',hood:'Moema',km:4.1,day:'Terça',time:'20:00',level:'Intermediário',spots:4,cost:'R$ 12 por pessoa',confirmed:true,active:'Partida confirmada há 4 dias',org:'Patrícia S.',rules:'Grupo acolhedor para quem está voltando a jogar.'},
+ {id:4,sport:'Beach tennis',name:'Beach Tennis Ibirapuera',hood:'Ibirapuera',km:3.5,day:'Domingo',time:'08:00',level:'Iniciante',spots:2,cost:'R$ 30 por pessoa',confirmed:true,active:'Partida confirmada há 1 dia',org:'Bruno T.',rules:'Raquetes emprestadas para quem está começando.'},
+ {id:5,sport:'Vôlei',name:'Vôlei Pinheiros',hood:'Pinheiros',km:7.6,day:'Quinta',time:'21:00',level:'Avançado',spots:1,cost:'R$ 18 por pessoa',confirmed:true,active:'Partida confirmada há 3 dias',org:'Rafael L.',rules:'Jogo competitivo, ritmo intenso.'},
+ {id:6,sport:'Beach tennis',name:'Duplas da Saúde',hood:'Saúde',km:2.2,day:'Sexta',time:'18:30',level:'Intermediário',spots:3,cost:'R$ 25 por pessoa',confirmed:true,active:'Partida confirmada há 5 dias',org:'Luana C.',rules:'Rodízio de duplas a cada 20 minutos.'},
+ {id:7,sport:'Futsal',name:'Futsal da Mooca',hood:'Mooca',km:5.3,day:'Segunda',time:'20:30',level:'Intermediário',spots:3,cost:'R$ 15 por pessoa',confirmed:true,active:'Partida confirmada ontem',org:'Felipe A.',rules:'Times de 5 com rodízio a cada 10 minutos. Trazer colete claro e escuro.'},
+ {id:8,sport:'Basquete',name:'Basquete na Roosevelt',hood:'Consolação',km:3.0,day:'Sábado',time:'16:00',level:'Todos os níveis',spots:4,cost:'Gratuito',confirmed:true,active:'Partida confirmada há 2 dias',org:'André K.',rules:'Jogos de 3x3 em quadra pública. Quem chega entra na fila.'},
+ {id:9,sport:'Handebol',name:'Handebol Vila Mariana',hood:'Vila Mariana',km:1.6,day:'Quinta',time:'19:00',level:'Iniciante',spots:5,cost:'R$ 10 por pessoa',confirmed:true,active:'Partida confirmada há 3 dias',org:'Renata F.',rules:'Turma para quem está aprendendo. Aquecimento e treino de passe antes do jogo.'}
+];
+
+/* CEPs de exemplo (protótipo, sem consulta externa) */
+const CEPS={
+  '04101000':{street:'Rua Domingos de Morais',hood:'Vila Mariana'},
+  '04001000':{street:'Rua Vergueiro',hood:'Paraíso'},
+  '05422000':{street:'Rua dos Pinheiros',hood:'Pinheiros'}
+};
+
+/* ---------- navegação ---------- */
+const CFG={
+  welcome:{},login:{},signup:{},verify:{},profile:{},
+  search:{title:'Buscar vagas',menu:true,nav:'search'},
+  activity:{title:'Atividade',menu:true,nav:'activity'},
+  publish:{title:'Criar grupo',menu:true,nav:'publish'},
+  group:{title:'Detalhes do grupo',back:'search'},
+  candidates:{title:'Candidatos',back:'activity'},
+  notifications:{title:'Notificações',back:'search'}
+};
+let backTarget=null;
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  const c=CFG[id]||{};
+  let showBar=!!c.title;
+  if(id==='profile'&&state.editing){showBar=true;$('appbarTitle').textContent='Perfil';backTarget='search';setBtn('←')}
+  else if(c.title){
+    $('appbarTitle').textContent=c.title;
+    if(c.menu){backTarget=null;setBtn('☰')}else{backTarget=c.back;setBtn('←')}
+  }
+  $('appbar').style.display=showBar?'flex':'none';
+  $('bellBtn').style.display=(c.menu&&state.logged)?'block':'none';
+  $('nav').style.display=c.nav?'flex':'none';
+  ['search','activity','publish'].forEach(n=>$('nv-'+n).classList.toggle('on',c.nav===n));
+  $(id).scrollTop=0;
+  if(id==='search')applyFilters();
+  if(id==='activity')renderActivity();
+  if(id==='notifications')renderNotifs();
+  updateBell();
+}
+function setBtn(t){$('appbarBtn').textContent=t}
+function appbarAction(){
+  if(backTarget){if(state.editing)state.editing=false;go(backTarget)}
+  else{
+    $('overlay').classList.add('show');$('drawer').classList.add('show');
+    $('drName').textContent=state.user.name||'Atleta';
+    $('drPhone').textContent=state.user.hood?state.user.hood+' · São Paulo':'Quadra Cheia';
+  }
+}
+function closeAll(){
+  $('overlay').classList.remove('show');$('drawer').classList.remove('show');$('modal').classList.remove('show');
+  $('overlay').style.zIndex=20;
+}
+function modal(title,html,closeLabel,secClose){
+  $('mTitle').textContent=title;$('mBody').innerHTML=html;
+  $('mClose').textContent=closeLabel||'Fechar';
+  $('mClose').className='btn'+(secClose?' sec':'');
+  $('overlay').classList.add('show');$('modal').classList.add('show');$('overlay').style.zIndex=30;
+}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+function openHelp(){closeAll();modal('Ajuda','<p>Dúvidas sobre grupos, solicitações ou segurança? Em breve você poderá falar com nosso time por aqui.</p>')}
+function logout(){closeAll();state.logged=false;state.editing=false;go('welcome')}
+
+/* ---------- notificações ---------- */
+function addNotif(icon,title,text,tab){
+  state.notifs.unshift({icon,title,text,tab,read:false,time:new Date()});
+  updateBell();
+  if(state.logged)toast('🔔 '+title);
+  if($('notifications').classList.contains('active'))renderNotifs();
+}
+function updateBell(){
+  const n=state.notifs.filter(x=>!x.read).length;
+  const b=$('bellBadge');b.textContent=n>9?'9+':n;b.style.display=n?'flex':'none';
+}
+function renderNotifs(){
+  const box=$('notifList');
+  if(!state.notifs.length){box.innerHTML='<div class="empty">Você não tem notificações por enquanto.<br>Avisaremos quando alguém responder sua solicitação ou pedir para entrar no seu grupo.</div>';return}
+  box.innerHTML=state.notifs.map((n,i)=>
+    '<div class="notif'+(n.read?'':' unread')+'" onclick="openNotif('+i+')"><div class="ic">'+n.icon+'</div><div><b>'+n.title+'</b><div class="meta">'+n.text+'</div><div class="t">'+timeAgo(n.time)+'</div></div></div>'
+  ).join('');
+  state.notifs.forEach(n=>n.read=true);updateBell();
+}
+function timeAgo(d){const s=Math.round((Date.now()-d)/1000);if(s<60)return 'agora';return 'há '+Math.round(s/60)+' min'}
+function openNotif(i){const n=state.notifs[i];state.tab=n.tab||'req';go('activity')}
+
+/* ---------- cadastro / login ---------- */
+function maskPhone(v){
+  const d=v.replace(/\D/g,'').slice(0,11);
+  if(d.length<=2)return d.length?'('+d:'';
+  if(d.length<=6)return '('+d.slice(0,2)+') '+d.slice(2);
+  if(d.length<=10)return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
+  return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
+}
+$('suPhone').addEventListener('input',e=>{e.target.value=maskPhone(e.target.value)});
+
+function doSignup(){
+  const n=$('suName').value.trim(),err=$('suErr');
+  err.textContent='';
+  Object.assign(state.user,{name:n,email:$('suEmail').value.trim(),phone:$('suPhone').value});
+  go('verify');
+}
+function doVerify(){
+  const err=$('vErr');
+  if($('vCode').value.replace(/\D/g,'').length!==6)return err.textContent='Digite o código de 6 dígitos.';
+  err.textContent='';state.logged=true;state.editing=false;
+  $('pfTitle').textContent='Monte seu perfil';$('pfBtn').textContent='Concluir';
+  renderMods();go('profile');
+}
+function doLogin(){
+  const em=$('lgEmail').value.trim(),pw=$('lgPass').value,err=$('lgErr');
+  if(!em||!pw)return err.textContent='Informe e-mail e senha.';
+  err.textContent='';state.logged=true;
+  if(!state.user.name)state.user.name=em.split('@')[0];
+  go('search');
+}
+
+/* ---------- perfil ---------- */
+function previewPhoto(inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{state.user.photo=e.target.result;$('photoBox').innerHTML='<img src="'+e.target.result+'" alt="Foto de perfil">'};
+  r.readAsDataURL(f);
+}
+function onCepInput(inp){
+  let v=inp.value.replace(/\D/g,'').slice(0,8);
+  if(v.length>5)v=v.slice(0,5)+'-'+v.slice(5);
+  inp.value=v;
+  const digits=v.replace(/\D/g,'');
+  if(digits.length<8){$('pfStreet').value='';$('pfHood').value='';return}
+  const a=CEPS[digits];
+  if(a){$('pfStreet').value=a.street;$('pfHood').value=a.hood;toast('Endereço preenchido pelo CEP')}
+  else{
+    /* protótipo: qualquer outro CEP recebe um endereço de exemplo para o teste não travar */
+    $('pfStreet').value='Rua Augusta';$('pfHood').value='Consolação';
+    toast('Protótipo: endereço de exemplo');
+  }
+}
+function renderMods(){
+  const rows=state.user.mods;const box=$('modRows');box.innerHTML='';
+  rows.forEach((m,i)=>{
+    const taken=rows.filter((_,j)=>j!==i).map(x=>x.sport);
+    const row=document.createElement('div');row.className='mod-row';
+    const s=document.createElement('select');
+    s.innerHTML='<option value="">Modalidade</option>'+SPORTS.filter(x=>!taken.includes(x)).map(x=>'<option '+(m.sport===x?'selected':'')+'>'+x+'</option>').join('');
+    s.onchange=()=>{m.sport=s.value;renderMods()};
+    const l=document.createElement('select');
+    l.innerHTML='<option value="">Nível</option>'+LEVELS.map(x=>'<option '+(m.level===x?'selected':'')+'>'+x+'</option>').join('');
+    l.onchange=()=>{m.level=l.value};
+    row.append(s,l);
+    if(rows.length>1){const x=document.createElement('button');x.className='x';x.textContent='✕';x.setAttribute('aria-label','Remover');x.onclick=()=>{rows.splice(i,1);renderMods()};row.append(x)}
+    else row.style.gridTemplateColumns='1fr 1fr';
+    box.append(row);
+  });
+  $('addMod').style.display=rows.length>=SPORTS.length?'none':'inline-block';
+}
+function addMod(){state.user.mods.push({sport:'',level:''});renderMods()}
+function saveProfile(){
+  const err=$('pfErr');
+  const cep=$('pfCep').value.replace(/\D/g,'');
+  const street=$('pfStreet').value.trim(),hood=$('pfHood').value.trim();
+  if(cep.length!==8)return err.textContent='Informe um CEP válido.';
+  if(!street||!hood)return err.textContent='Digite o CEP para preencher o endereço.';
+  if(state.user.mods.some(m=>!m.sport||!m.level))return err.textContent='Escolha modalidade e nível em todos os campos.';
+  err.textContent='';
+  state.user.cep=$('pfCep').value;state.user.street=street;state.user.hood=hood;
+  const wasEditing=state.editing,first=!state.user.onboarded;
+  state.editing=false;state.user.onboarded=true;
+  go('search');
+  if(wasEditing)toast('Perfil salvo');
+  if(first)addNotif('👋','Boas-vindas ao Quadra Cheia','Seu perfil está pronto. Encontre uma vaga perto de '+hood+'.','req');
+}
+function openProfile(){
+  closeAll();state.editing=true;
+  $('pfTitle').textContent='Seu perfil';$('pfBtn').textContent='Salvar';
+  $('pfCep').value=state.user.cep;$('pfStreet').value=state.user.street;$('pfHood').value=state.user.hood;
+  renderMods();
+  if(state.user.photo)$('photoBox').innerHTML='<img src="'+state.user.photo+'" alt="Foto de perfil">';
+  go('profile');
+}
+
+/* ---------- busca ---------- */
+function renderSportChips(){
+  const box=$('sportChips');box.innerHTML='';
+  ['Todos',...SPORTS].forEach(s=>{
+    const c=document.createElement('div');c.className='chip'+(state.filters.sport===s?' on':'');c.textContent=s;
+    c.onclick=()=>{state.filters.sport=s;applyFilters()};box.append(c);
+  });
+}
+const MS={
+  days:{options:DAYS_FULL,empty:'Qualquer dia',fmt:a=>a.length<=3?a.map(x=>DAYS_SHORT[x]).join(', '):a.length+' dias'},
+  periods:{options:PERIODS,empty:'Qualquer período',fmt:a=>a.length<=2?a.join(', '):a.length+' períodos'},
+  levels:{options:LEVELS,empty:'Qualquer nível',fmt:a=>a.length<=2?a.join(', '):a.length+' níveis'}
+};
+function toggleMs(k){state.filters.open=state.filters.open===k?null:k;renderMs()}
+function closeMs(k){state.filters.open=null;applyFilters()}
+function toggleOpt(k,v){
+  const a=state.filters[k],i=a.indexOf(v);i>-1?a.splice(i,1):a.push(v);applyFilters();
+}
+function clearMs(k){state.filters[k]=[];applyFilters()}
+function renderMs(){
+  Object.keys(MS).forEach(k=>{
+    const sel=state.filters[k],cfg=MS[k],open=state.filters.open===k;
+    $('msLbl-'+k).textContent=sel.length?cfg.fmt(sel):cfg.empty;
+    $('msBtn-'+k).className='ms-btn'+(sel.length?' has':'')+(open?' open':'');
+    const p=$('msPanel-'+k);p.classList.toggle('show',open);
+    if(open){
+      p.innerHTML=cfg.options.map(o=>'<label class="ms-opt"><input type="checkbox" '+(sel.includes(o)?'checked':'')+' onchange="toggleOpt(\''+k+'\',\''+o+'\')">'+o+'</label>').join('')+
+        '<div class="ms-foot"><button onclick="clearMs(\''+k+'\')">Limpar</button><button onclick="closeMs(\''+k+'\')">Pronto</button></div>';
+    }
+  });
+}
+function getPeriod(time){
+  const h=Number(time.split(':')[0]);
+  if(h<12)return 'Manhã';
+  if(h<18)return 'Tarde';
+  return 'Noite';
+}
+function statusHtml(g,mt){
+  const st=mt?'margin-top:'+mt+'px':'';
+  return g.confirmed
+    ?'<div class="meta ok" style="'+st+'">● '+g.active+'</div>'
+    :'<div class="meta" style="'+st+'">○ Aguardando confirmação do organizador</div>';
+}
+function allGroups(){return GROUPS.concat(state.myGroups.filter(g=>g.listed))}
+function applyFilters(){
+  const f=state.filters;f.km=+$('fKm').value;$('kmVal').textContent=f.km;
+  renderSportChips();renderMs();
+  const list=allGroups().filter(g=>
+    (f.sport==='Todos'||g.sport===f.sport)&&
+    (!f.days.length||f.days.includes(g.day))&&
+    (!f.periods.length||f.periods.includes(getPeriod(g.time)))&&
+    (!f.levels.length||f.levels.includes(g.level)||g.level==='Todos os níveis')&&
+    g.km<=f.km
+  ).sort((a,b)=>a.km-b.km);
+  const box=$('results');
+  if(!list.length){box.innerHTML='<div class="empty">Nenhuma vaga encontrada com esses filtros.<br>Tente aumentar a distância ou escolher mais dias e períodos.</div>';return}
+  box.innerHTML=list.map(g=>
+    '<div class="card" onclick="openGroup('+g.id+')"><div class="top"><span class="tag">'+g.sport+'</span><span class="ok">'+g.spots+(g.spots===1?' vaga':' vagas')+'</span></div>'+
+    '<h3>'+g.name+'</h3><div class="meta">'+g.hood+' · '+g.km.toFixed(1).replace('.',',')+' km<br>'+g.day+', '+g.time+' ('+getPeriod(g.time)+') · '+g.level+'</div>'+
+    statusHtml(g,6)+
+    '<div class="more">Ver detalhes ›</div></div>'
+  ).join('');
+}
+
+/* ---------- detalhe do grupo ---------- */
+function openGroup(id){
+  const g=allGroups().find(x=>x.id===id);state.currentGroup=g;
+  const req=state.requests.find(r=>r.gid===id);
+  let action;
+  if(!req)action='<label>Mensagem para o organizador (opcional)</label><textarea id="reqMsg" rows="2" placeholder="Ex.: Estou voltando a jogar e sou iniciante."></textarea><button class="btn" onclick="sendRequest('+id+')">Solicitar entrada</button>';
+  else action='<button class="btn sec" onclick="state.tab=\'req\';go(\'activity\')">Solicitação enviada · ver em Atividade</button>';
+  $('group').innerHTML='<span class="tag" style="align-self:flex-start">'+g.sport+'</span>'+
+   '<h2 style="margin-top:10px">'+g.name+'</h2>'+
+   '<div class="meta">Organizado por '+g.org+' · <span class="badge">✔ Perfil verificado</span></div>'+
+   statusHtml(g,6)+
+   '<div class="info-grid"><div><b>Local</b>'+g.hood+' · '+g.km.toFixed(1).replace('.',',')+' km</div><div><b>Quando</b>'+g.day+', '+g.time+' ('+getPeriod(g.time)+')</div><div><b>Nível</b>'+g.level+'</div><div><b>Vagas</b>'+g.spots+'</div><div style="grid-column:1/-1"><b>Custo</b>'+g.cost+'</div></div>'+
+   '<label style="margin-top:0">Regras do grupo</label><p class="meta" style="font-size:14px">'+g.rules+'</p>'+
+   action+
+   '<div class="note">Seu telefone não é exibido. O link da comunidade no WhatsApp é liberado somente após o aceite do organizador.</div>'+
+   '<button class="link" onclick="openReport()">Denunciar ou bloquear</button>';
+  go('group');
+}
+function sendRequest(id){
+  state.requests.push({gid:id,status:'pending'});
+  toast('Solicitação enviada');openGroup(id);
+}
+function openReport(){
+  modal('Denunciar ou bloquear','<p>O que você deseja fazer?</p><button class="btn danger" onclick="closeAll();toast(\'Denúncia enviada. Obrigado!\')">Denunciar comportamento</button><button class="btn danger" onclick="closeAll();toast(\'Usuário bloqueado\')">Bloquear organizador</button><div style="height:6px"></div>');
+}
+
+/* ---------- atividade ---------- */
+function setTab(t){state.tab=t;renderActivity()}
+function renderActivity(){
+  $('tabReq').classList.toggle('on',state.tab==='req');$('tabMine').classList.toggle('on',state.tab==='mine');
+  const box=$('activityList');
+  if(state.tab==='req'){
+    if(!state.requests.length){box.innerHTML='<div class="empty">Você ainda não solicitou entrada em nenhum grupo.<br>Use a aba Buscar para encontrar vagas.</div>';return}
+    box.innerHTML=state.requests.map((r,i)=>{
+      const g=allGroups().find(x=>x.id===r.gid);
+      const lbl={pending:'Aguardando',accepted:'Aceito',declined:'Recusado'}[r.status];
+      let extra='';
+      if(r.status==='pending')extra=
+        '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn sec sm" style="flex:1" onclick="event.stopPropagation();simulate('+i+',\'accepted\')">Simular aceite</button><button class="btn sec sm" style="flex:1" onclick="event.stopPropagation();simulate('+i+',\'declined\')">Simular recusa</button></div>'+
+        '<div class="meta" style="margin-top:6px;font-size:11.5px">Botões acima só para o protótipo.</div>'+
+        '<button class="btn danger sm" style="width:100%;margin-top:10px" onclick="event.stopPropagation();confirmCancel('+i+')">Cancelar solicitação</button>';
+      if(r.status==='accepted')extra=
+        '<button class="btn sm" style="width:100%;margin-top:10px" onclick="event.stopPropagation();joinWhats()">Entrar no grupo do WhatsApp</button>'+
+        '<button class="btn danger sm" style="width:100%;margin-top:8px" onclick="event.stopPropagation();confirmCancel('+i+')">Desistir da vaga</button>';
+      return '<div class="card" onclick="openGroup('+g.id+')"><div class="top"><span class="tag">'+g.sport+'</span><span class="status st-'+r.status+'">'+lbl+'</span></div><h3>'+g.name+'</h3><div class="meta">'+g.day+', '+g.time+' · '+g.hood+'</div>'+extra+'</div>';
+    }).join('');
+  }else{
+    if(!state.myGroups.length){box.innerHTML='<div class="empty">Você ainda não criou nenhum grupo.<br>Toque em Criar grupo para começar.</div>';return}
+    box.innerHTML=state.myGroups.map(g=>{
+      const pend=g.cands.filter(c=>c.status==='pending').length;
+      return '<div class="card" onclick="openCandidates('+g.id+')"><div class="top"><span class="tag">'+g.sport+'</span><span class="ok">'+g.spots+(g.spots===1?' vaga':' vagas')+'</span></div><h3>'+g.name+'</h3><div class="meta">'+g.day+', '+g.time+' · '+g.hood+'<br><b>'+pend+'</b> candidato(s) aguardando resposta</div>'+statusHtml(g,6)+'<div class="more">Ver candidatos ›</div></div>';
+    }).join('');
+  }
+}
+function simulate(i,s){
+  const r=state.requests[i];r.status=s;
+  const g=allGroups().find(x=>x.id===r.gid);
+  renderActivity();
+  if(s==='accepted')addNotif('✅','Solicitação aceita','O organizador de '+g.name+' aceitou você. Entre no grupo do WhatsApp.','req');
+  else addNotif('❌','Solicitação recusada','Dessa vez não foi possível entrar em '+g.name+'. Veja outras vagas perto de você.','req');
+}
+function confirmCancel(i){
+  const r=state.requests[i];if(!r)return;
+  const g=allGroups().find(x=>x.id===r.gid);
+  const acc=r.status==='accepted';
+  modal(acc?'Desistir da vaga?':'Cancelar solicitação?',
+    '<p>'+(acc?'Você sairá de <b>'+g.name+'</b> e sua vaga ficará livre para outra pessoa.':'Sua solicitação para <b>'+g.name+'</b> será removida. Você poderá solicitar de novo depois.')+'</p>'+
+    '<button class="btn danger" onclick="doCancel('+i+')">'+(acc?'Sim, desistir':'Sim, cancelar')+'</button>','Voltar');
+}
+function doCancel(i){
+  const r=state.requests[i];if(!r)return;
+  const acc=r.status==='accepted';
+  state.requests.splice(i,1);
+  closeAll();renderActivity();
+  toast(acc?'Você desistiu da vaga':'Solicitação cancelada');
+}
+function joinWhats(){
+  modal('Convite liberado','<p>O organizador aceitou você. No produto final, este botão abre o convite da comunidade no WhatsApp.</p><p class="meta">Seu telefone continua oculto para os outros membros até você entrar.</p>');
+}
+
+/* ---------- criar grupo / candidatos ---------- */
+function doPublish(){
+  const err=$('pbErr'),link=$('pbLink').value.trim();
+  if(!$('pbHood').value.trim())return err.textContent='Informe o bairro do local.';
+  if(link&&!/^https:\/\/chat\.whatsapp\.com\/\S+/.test(link))return err.textContent='O link precisa começar com https://chat.whatsapp.com/ ou ficar em branco.';
+  const spots=+$('pbSpots').value;
+  if(!Number.isInteger(spots)||spots<1||spots>20)return err.textContent='Informe de 1 a 20 vagas.';
+  err.textContent='';
+  const sport=$('pbSport').value,hood=esc($('pbHood').value.trim());
+  const name=esc($('pbName').value.trim())||(sport+' · '+hood);
+  const confirmed=$('pbConfirmed').checked;
+  const id=100+state.myGroups.length+1;
+  state.myGroups.push({
+    /* PENDENTE (problema 5): distância fixa em 1,0 km; calcular a partir do endereço do usuário. Corrigir só quando for pedido. */
+    id,sport,name,hood,km:1.0,day:$('pbDay').value,time:$('pbTime').value,
+    level:$('pbLevel').value,spots:+$('pbSpots').value,cost:esc($('pbCost').value.trim())||'A combinar',
+    confirmed,active:'Partida confirmada agora',org:esc(state.user.name)||'Você',rules:'Combinado com o organizador.',listed:true,link:link,
+    cands:[
+      {name:'Mariana A.',sport,level:'Iniciante',hood:'Vila Mariana',verified:true,status:'pending',
+       availability:'Sábados pela manhã',experience:'Jogou na faculdade e está retomando a prática.',message:'Procuro uma turma acolhedora para voltar a jogar.',photo:null},
+      {name:'Thiago P.',sport,level:'Intermediário',hood:'Paraíso',verified:true,status:'pending',
+       availability:'Quartas à noite',experience:'Joga há dois anos e participa de partidas semanais.',message:'Tenho disponibilidade para jogar toda quarta-feira.',photo:null},
+      {name:'Juliana K.',sport,level:'Iniciante',hood:'Moema',verified:false,status:'pending',
+       availability:'Terças e quintas à noite',experience:'Começou a praticar recentemente.',message:'Gostaria de conhecer o grupo antes de confirmar.',photo:null}
+    ]
+  });
+  $('pbName').value='';$('pbConfirmed').checked=false;
+  state.tab='mine';toast('Grupo criado');go('activity');
+  setTimeout(()=>addNotif('🙋','Novos candidatos','3 pessoas pediram para entrar em '+name+'.','mine'),3500);
+}
+function openCandidates(id){
+  state.currentMine=state.myGroups.find(x=>x.id===id);renderCandidates();go('candidates');
+}
+function toggleConfirmed(){
+  const g=state.currentMine;g.confirmed=!g.confirmed;
+  if(g.confirmed)g.active='Partida confirmada agora';
+  toast(g.confirmed?'Partida marcada como confirmada':'Confirmação removida');
+  renderCandidates();
+}
+function renderCandidates(){
+  const g=state.currentMine;
+  $('candidates').innerHTML='<h2>'+g.name+'</h2><p class="sub" style="margin-bottom:6px">'+g.day+', '+g.time+' · '+g.spots+(g.spots===1?' vaga':' vagas')+'</p>'+
+  statusHtml(g,0)+
+  '<button class="btn sec sm" style="width:100%;margin:12px 0 16px" onclick="toggleConfirmed()">'+(g.confirmed?'Desmarcar partida confirmada':'Marcar partida como confirmada')+'</button>'+
+  g.cands.map((c,i)=>{
+    let act='';
+    if(c.status==='pending')act='<div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm" style="flex:1" onclick="event.stopPropagation();decide('+i+',\'accepted\')">Aceitar</button><button class="btn sec sm" style="flex:1" onclick="event.stopPropagation();decide('+i+',\'declined\')">Recusar</button></div>';
+    else if(c.status==='accepted')act='<button class="btn sm" style="margin-top:10px;width:100%" onclick="event.stopPropagation();invite('+i+')">Convidar para o WhatsApp</button>';
+    const lbl={pending:'Aguardando',accepted:'Aceito',declined:'Recusado'}[c.status];
+    return '<div class="card" onclick="viewCandidate('+i+')"><div class="top"><h3>'+c.name+'</h3><span class="status st-'+c.status+'">'+lbl+'</span></div>'+
+      '<div class="meta">'+c.sport+' · '+c.level+'<br>Região: '+c.hood+'<br>'+(c.verified?'<span class="badge">✔ Perfil verificado</span>':'Verificação pendente')+' · Telefone oculto</div>'+
+      '<div class="more">Ver perfil completo ›</div>'+
+      act+
+      '<button class="link" style="display:block;margin:10px auto 0" onclick="event.stopPropagation();openReport()">Denunciar ou bloquear</button></div>';
+  }).join('');
+}
+function viewCandidate(i){
+  const c=state.currentMine.cands[i];
+  const photo=c.photo
+    ?'<img src="'+c.photo+'" alt="Foto de '+c.name+'" style="width:76px;height:76px;border-radius:50%;object-fit:cover">'
+    :'<div class="photo" style="width:76px;height:76px;font-size:24px;margin:0 auto;cursor:default">📷</div>';
+  const ver=c.verified?'<span class="badge">✔ Perfil verificado</span>':'<span class="meta">Verificação pendente</span>';
+  const lbl={pending:'Aguardando',accepted:'Aceito',declined:'Recusado'}[c.status];
+  let act='';
+  if(c.status==='pending')act='<div style="display:flex;gap:8px;margin-top:14px"><button class="btn sm" style="flex:1" onclick="decide('+i+',\'accepted\')">Aceitar</button><button class="btn sec sm" style="flex:1" onclick="decide('+i+',\'declined\')">Recusar</button></div>';
+  else if(c.status==='accepted')act='<button class="btn sm" style="width:100%;margin-top:14px" onclick="invite('+i+')">Convidar para o WhatsApp</button>';
+  modal('Perfil de '+c.name,
+    '<div style="text-align:center;margin-bottom:12px">'+photo+'<div style="margin-top:8px;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap">'+ver+'<span class="status st-'+c.status+'">'+lbl+'</span></div></div>'+
+    '<div class="info-grid">'+
+      '<div><b>Modalidade</b>'+c.sport+'</div>'+
+      '<div><b>Nível</b>'+c.level+'</div>'+
+      '<div><b>Região</b>'+c.hood+'</div>'+
+      '<div><b>Disponibilidade</b>'+c.availability+'</div>'+
+    '</div>'+
+    '<p><strong>Experiência</strong><br>'+c.experience+'</p>'+
+    '<p><strong>Mensagem para o organizador</strong><br>'+c.message+'</p>'+
+    '<div class="note">O telefone permanece oculto até o aceite do organizador.</div>'+
+    act,'Fechar',true);
+}
+function decide(i,s){
+  state.currentMine.cands[i].status=s;
+  closeAll();
+  toast(s==='accepted'?'Candidato aceito':'Candidato recusado');
+  renderCandidates();
+}
+function invite(i){
+  const c=state.currentMine.cands[i],g=state.currentMine;
+  if(!g.link)return modal('Link não cadastrado','<p>Você não adicionou o link da comunidade ao criar este grupo. Nesta versão do protótipo, o convite só é enviado quando há um link.</p>');
+  modal('Convite enviado','<p>'+c.name+' recebeu o link da comunidade no WhatsApp.</p><p class="meta">O link só é liberado depois do seu aceite.</p>');
+}
+
+/* init */
+renderSportChips();renderMs();renderMods();go('welcome');
+</script>
+</body>
+</html>
