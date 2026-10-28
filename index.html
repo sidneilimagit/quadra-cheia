@@ -143,41 +143,44 @@
     <button class="link" style="align-self:flex-start;margin:0 0 10px" onclick="go('welcome')">← Voltar</button>
     <h2>Entrar</h2>
     <p class="sub">Acesse sua conta para ver as vagas disponíveis.</p>
-    <label>E-mail</label>
-    <input id="lgEmail" inputmode="email" autocapitalize="none" placeholder="seu@email.com">
-    <label>Senha</label>
-    <input type="password" id="lgPass" placeholder="Sua senha">
+    <label for="lgEmail">E-mail</label>
+    <input id="lgEmail" type="email" inputmode="email" autocapitalize="none" placeholder="seu@email.com" autocomplete="email">
+    <label for="lgPass">Senha</label>
+    <input type="password" id="lgPass" placeholder="Sua senha" autocomplete="current-password">
     <div class="err" id="lgErr"></div>
-    <button class="btn" onclick="doLogin()">Entrar</button>
+    <button class="btn" id="lgBtn" onclick="doLogin()">Entrar</button>
   </section>
 
   <!-- CADASTRO -->
   <section class="screen" id="signup">
     <button class="link" style="align-self:flex-start;margin:0 0 10px" onclick="go('welcome')">← Voltar</button>
     <h2>Criar conta</h2>
-    <p class="sub">Verificamos seu e-mail e telefone para deixar a comunidade mais segura.</p>
-    <label>Nome completo</label>
-    <input id="suName" placeholder="Seu nome">
-    <label>E-mail</label>
-    <input id="suEmail" inputmode="email" autocapitalize="none" placeholder="seu@email.com">
-    <label>Telefone</label>
-    <input id="suPhone" inputmode="numeric" placeholder="(11) 99999-9999" maxlength="15">
-    <label>Senha</label>
-    <input type="password" id="suPass" placeholder="Mínimo 6 caracteres">
+    <p class="sub">Verificamos seu e-mail para deixar a comunidade mais segura.</p>
+    <label for="suName">Nome</label>
+    <input id="suName" placeholder="Como você quer ser chamado" maxlength="60" autocomplete="name">
+    <label for="suEmail">E-mail</label>
+    <input id="suEmail" type="email" inputmode="email" autocapitalize="none" placeholder="seu@email.com" autocomplete="email">
+    <label for="suPass">Senha</label>
+    <input type="password" id="suPass" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+    <label class="check-row" for="suTerms">
+      <input type="checkbox" id="suTerms">
+      <span><b>Li e aceito os termos</b><small>Concordo com os <a href="#" onclick="event.preventDefault();openTerms()">termos de uso e a política de privacidade</a>.</small></span>
+    </label>
     <div class="err" id="suErr"></div>
-    <button class="btn" onclick="doSignup()">Continuar</button>
-    <div class="note">Seu telefone não aparece para outros usuários. O contato por WhatsApp só é liberado após o aceite do organizador.</div>
+    <button class="btn" id="suBtn" onclick="doSignup()">Continuar</button>
+    <div class="note">Não pedimos seu telefone. O contato com o grupo acontece pela comunidade do WhatsApp, liberada só depois do aceite do organizador.</div>
   </section>
 
   <!-- VERIFICAÇÃO -->
   <section class="screen" id="verify">
     <h2>Verifique sua conta</h2>
-    <p class="sub">Enviamos um código de 6 dígitos para seu e-mail e telefone.<br>(Protótipo: use qualquer código com 6 dígitos.)</p>
-    <label>Código</label>
-    <input class="code-input" id="vCode" inputmode="numeric" maxlength="6" placeholder="······">
+    <p class="sub">Enviamos um código para <b id="vEmail"></b>. Confira também a caixa de spam.</p>
+    <label for="vCode">Código</label>
+    <input class="code-input" id="vCode" inputmode="numeric" maxlength="8" placeholder="······" autocomplete="one-time-code">
     <div class="err" id="vErr"></div>
-    <button class="btn" onclick="doVerify()">Verificar</button>
-    <button class="link" onclick="toast('Novo código enviado')">Reenviar código</button>
+    <button class="btn" id="vBtn" onclick="doVerify()">Verificar</button>
+    <button class="link" onclick="resendCode()">Reenviar código</button>
+    <button class="link" style="margin-top:4px" onclick="go('signup')">Corrigir e-mail</button>
   </section>
 
   <!-- PERFIL / ONBOARDING -->
@@ -185,14 +188,8 @@
     <h2 id="pfTitle">Monte seu perfil</h2>
     <p class="sub">Assim os organizadores sabem se você combina com o grupo.</p>
 
-    <div class="photo-wrap">
-      <div class="photo" id="photoBox" onclick="document.getElementById('photoInput').click()">📷</div>
-      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="previewPhoto(this)">
-      <div class="hint">Perfis com foto são aceitos mais rápido</div>
-    </div>
-
     <label for="pfCep">CEP</label>
-    <input id="pfCep" inputmode="numeric" maxlength="9" placeholder="00000-000" oninput="onCepInput(this)">
+    <input id="pfCep" inputmode="numeric" maxlength="9" placeholder="00000-000" oninput="onCepInput(this)" autocomplete="postal-code">
 
     <label for="pfStreet">Rua</label>
     <input id="pfStreet" placeholder="Preenchida pelo CEP" readonly>
@@ -203,14 +200,19 @@
       </div>
       <div>
         <label for="pfCity">Cidade</label>
-        <input id="pfCity" value="São Paulo" readonly>
+        <input id="pfCity" placeholder="Preenchida pelo CEP" readonly>
       </div>
     </div>
-    <div class="note">Digite o CEP e o endereço é preenchido automaticamente. Para testar, use 04101-000, 04001-000 ou 05422-000.</div>
+    <div class="note" id="pfCepNote">Usamos o CEP só para calcular a distância até os grupos. Outros usuários veem apenas o seu bairro.</div>
 
     <label>Modalidades e nível</label>
     <div id="modRows"></div>
     <button class="btn sec sm" id="addMod" onclick="addMod()" style="margin-top:4px">+ Adicionar modalidade</button>
+
+    <label>Quando você pode jogar</label>
+    <div class="chips" id="pfDays"></div>
+    <div class="chips" id="pfPeriods" style="margin-top:8px"></div>
+    <div class="note">Os organizadores veem sua disponibilidade para saber se você combina com o horário do grupo.</div>
 
     <div class="err" id="pfErr"></div>
     <button class="btn" id="pfBtn" onclick="saveProfile()">Concluir</button>
@@ -255,12 +257,17 @@
     <h2>Criar grupo</h2>
     <p class="sub">Organiza uma partida e precisa de mais jogadores? Cadastre seu grupo e receba solicitações de entrada.</p>
     <div class="note" style="margin-top:0;margin-bottom:6px">Esta área é para quem organiza grupos ou partidas. Para encontrar uma vaga para jogar, use a aba Buscar.</div>
-    <label>Nome do grupo</label>
+    <label for="pbName">Nome do grupo</label>
     <input id="pbName" placeholder="Ex.: Areia da Vila" maxlength="40">
-    <label>Modalidade</label>
+    <label for="pbSport">Modalidade</label>
     <select id="pbSport"><option>Vôlei</option><option>Vôlei de areia</option><option>Futsal</option><option>Basquete</option><option>Handebol</option><option>Beach tennis</option></select>
-    <label>Local (bairro)</label>
-    <input id="pbHood" placeholder="Ex.: Vila Mariana">
+    <label for="pbCep">CEP da quadra</label>
+    <input id="pbCep" inputmode="numeric" maxlength="9" placeholder="00000-000" oninput="onPubCepInput(this)">
+    <label for="pbHood">Bairro</label>
+    <input id="pbHood" placeholder="Preenchido pelo CEP" readonly>
+    <div class="note">O CEP do local do jogo é usado para mostrar a distância a quem busca. Aparece só o bairro.</div>
+    <label for="pbFormat">Formato do grupo</label>
+    <select id="pbFormat"><option>Misto</option><option>Feminino</option><option>Masculino</option></select>
     <label>Dia e horário</label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <select id="pbDay"><option>Segunda</option><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option selected>Sábado</option><option>Domingo</option></select>
@@ -270,18 +277,20 @@
       <input type="checkbox" id="pbConfirmed">
       <span><b>Partida confirmada</b><small>Marque se a partida já está garantida. Quem buscar verá o selo "Partida confirmada".</small></span>
     </label>
-    <label>Nível</label>
+    <label for="pbLevel">Nível</label>
     <select id="pbLevel"><option>Iniciante</option><option>Intermediário</option><option>Avançado</option><option>Todos os níveis</option></select>
-    <label>Vagas abertas</label>
+    <label for="pbSpots">Vagas abertas</label>
     <input type="number" id="pbSpots" min="1" max="20" value="2" inputmode="numeric">
     <div class="note">Até 20 vagas por grupo.</div>
-    <label>Custo por pessoa</label>
-    <input id="pbCost" placeholder="Ex.: R$ 15 ou Gratuito">
-    <label>Link da comunidade no WhatsApp (opcional)</label>
-    <input id="pbLink" placeholder="https://chat.whatsapp.com/...">
-    <div class="note">O link fica oculto e só é enviado aos candidatos que você aceitar. Você pode deixar em branco por enquanto.</div>
+    <label for="pbCost">Custo por pessoa</label>
+    <input id="pbCost" placeholder="Ex.: R$ 15 ou Gratuito" maxlength="40">
+    <label for="pbRules">Regras e como funciona (opcional)</label>
+    <textarea id="pbRules" rows="3" maxlength="500" placeholder="Ex.: Chegar 10 min antes. Iniciantes são bem-vindos."></textarea>
+    <label for="pbLink">Link da comunidade no WhatsApp (opcional)</label>
+    <input id="pbLink" placeholder="https://chat.whatsapp.com/..." autocapitalize="none">
+    <div class="note">O link fica oculto e só é liberado para quem você aceitar. Você pode adicionar depois, em Atividade → Meus grupos.</div>
     <div class="err" id="pbErr"></div>
-    <button class="btn" onclick="doPublish()">Criar grupo e receber jogadores</button>
+    <button class="btn" id="pbBtn" onclick="doPublish()">Criar grupo e receber jogadores</button>
   </section>
 
   <!-- CANDIDATOS -->
@@ -303,7 +312,7 @@
   <div class="drawer" id="drawer">
     <div class="who"><b id="drName">Atleta</b><span id="drPhone">Quadra Cheia</span></div>
     <button class="item" onclick="openProfile()">Perfil</button>
-    <button class="item" onclick="closeAll();toast('Configurações disponíveis na versão completa')">Configurações</button>
+    <button class="item" onclick="openSettings()">Configurações</button>
     <button class="item" onclick="openHelp()">Ajuda</button>
     <button class="item" onclick="logout()">Sair</button>
   </div>
@@ -316,7 +325,20 @@
   <div class="toast" id="toast"></div>
 </div>
 
+<!-- Biblioteca oficial do Supabase, versão fixa e com verificação de integridade (SRI):
+     se o arquivo do CDN for alterado, o navegador se recusa a executá-lo. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+        integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+        crossorigin="anonymous"></script>
 <script>
+/* ---------- conexão com o Supabase ----------
+   A chave publishable é pública por natureza (vai para o navegador de todos).
+   Quem protege os dados são as regras de acesso (RLS) de supabase/schema.sql.
+   NUNCA colocar aqui a chave secret / service_role. */
+const SUPABASE_URL='https://idpdptvbjyqnxvzsqdii.supabase.co';
+const SUPABASE_KEY='sb_publishable_fBiWncOAjZjcGcmx99yO3g_nSJgVMvX';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
 const $=id=>document.getElementById(id);
 /* Escapa texto digitado pelo usuário antes de inserir no HTML (evita injeção de HTML/script) */
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -327,29 +349,10 @@ const DAYS_FULL=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo
 const DAYS_SHORT={Segunda:'Seg',Terça:'Ter',Quarta:'Qua',Quinta:'Qui',Sexta:'Sex',Sábado:'Sáb',Domingo:'Dom'};
 
 const state={
-  logged:false,editing:false,
-  user:{name:'',email:'',phone:'',cep:'',street:'',hood:'',photo:null,mods:[{sport:'',level:''}],onboarded:false},
+  logged:false,editing:false,addr:null,pubAddr:null,reportCtx:null,
+  user:{id:null,name:'',email:'',cep:'',hood:'',lat:null,lng:null,days:[],periods:[],mods:[{sport:'',level:''}],onboarded:false},
   filters:{sport:'Todos',days:[],periods:[],levels:[],km:6,open:null},
-  requests:[],myGroups:[],notifs:[],tab:'req',currentGroup:null,currentMine:null
-};
-
-const GROUPS=[
- {id:1,sport:'Vôlei de areia',name:'Areia da Vila',hood:'Vila Mariana',km:1.2,day:'Sábado',time:'09:00',level:'Iniciante',spots:3,cost:'R$ 15 por pessoa',confirmed:true,active:'Partida confirmada há 2 dias',org:'Camila R.',rules:'Chegar 10 min antes. Iniciantes são bem-vindos.'},
- {id:2,sport:'Vôlei de areia',name:'Quarta na Areia',hood:'Paraíso',km:2.8,day:'Quarta',time:'19:30',level:'Intermediário',spots:2,cost:'R$ 20 por pessoa',confirmed:true,active:'Partida confirmada ontem',org:'Diego M.',rules:'Jogos de 2h. Trazer bola não é obrigatório.'},
- {id:3,sport:'Vôlei',name:'Vôlei de Quadra Moema',hood:'Moema',km:4.1,day:'Terça',time:'20:00',level:'Intermediário',spots:4,cost:'R$ 12 por pessoa',confirmed:true,active:'Partida confirmada há 4 dias',org:'Patrícia S.',rules:'Grupo acolhedor para quem está voltando a jogar.'},
- {id:4,sport:'Beach tennis',name:'Beach Tennis Ibirapuera',hood:'Ibirapuera',km:3.5,day:'Domingo',time:'08:00',level:'Iniciante',spots:2,cost:'R$ 30 por pessoa',confirmed:true,active:'Partida confirmada há 1 dia',org:'Bruno T.',rules:'Raquetes emprestadas para quem está começando.'},
- {id:5,sport:'Vôlei',name:'Vôlei Pinheiros',hood:'Pinheiros',km:7.6,day:'Quinta',time:'21:00',level:'Avançado',spots:1,cost:'R$ 18 por pessoa',confirmed:true,active:'Partida confirmada há 3 dias',org:'Rafael L.',rules:'Jogo competitivo, ritmo intenso.'},
- {id:6,sport:'Beach tennis',name:'Duplas da Saúde',hood:'Saúde',km:2.2,day:'Sexta',time:'18:30',level:'Intermediário',spots:3,cost:'R$ 25 por pessoa',confirmed:true,active:'Partida confirmada há 5 dias',org:'Luana C.',rules:'Rodízio de duplas a cada 20 minutos.'},
- {id:7,sport:'Futsal',name:'Futsal da Mooca',hood:'Mooca',km:5.3,day:'Segunda',time:'20:30',level:'Intermediário',spots:3,cost:'R$ 15 por pessoa',confirmed:true,active:'Partida confirmada ontem',org:'Felipe A.',rules:'Times de 5 com rodízio a cada 10 minutos. Trazer colete claro e escuro.'},
- {id:8,sport:'Basquete',name:'Basquete na Roosevelt',hood:'Consolação',km:3.0,day:'Sábado',time:'16:00',level:'Todos os níveis',spots:4,cost:'Gratuito',confirmed:true,active:'Partida confirmada há 2 dias',org:'André K.',rules:'Jogos de 3x3 em quadra pública. Quem chega entra na fila.'},
- {id:9,sport:'Handebol',name:'Handebol Vila Mariana',hood:'Vila Mariana',km:1.6,day:'Quinta',time:'19:00',level:'Iniciante',spots:5,cost:'R$ 10 por pessoa',confirmed:true,active:'Partida confirmada há 3 dias',org:'Renata F.',rules:'Turma para quem está aprendendo. Aquecimento e treino de passe antes do jogo.'}
-];
-
-/* CEPs de exemplo (protótipo, sem consulta externa) */
-const CEPS={
-  '04101000':{street:'Rua Domingos de Morais',hood:'Vila Mariana'},
-  '04001000':{street:'Rua Vergueiro',hood:'Paraíso'},
-  '05422000':{street:'Rua dos Pinheiros',hood:'Pinheiros'}
+  groups:[],myRequests:[],myGroups:[],notifs:[],cands:[],tab:'req',currentGroup:null,currentMine:null
 };
 
 /* ---------- navegação ---------- */
@@ -378,8 +381,8 @@ function go(id){
   $('nav').style.display=c.nav?'flex':'none';
   ['search','activity','publish'].forEach(n=>$('nv-'+n).classList.toggle('on',c.nav===n));
   $(id).scrollTop=0;
-  if(id==='search')applyFilters();
-  if(id==='activity')renderActivity();
+  if(id==='search')loadSearch();
+  if(id==='activity')loadActivity();
   if(id==='notifications')renderNotifs();
   updateBell();
 }
@@ -403,15 +406,107 @@ function modal(title,html,closeLabel,secClose){
   $('overlay').classList.add('show');$('modal').classList.add('show');$('overlay').style.zIndex=30;
 }
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+/* ---------- configurações da conta ---------- */
+function openSettings(){
+  closeAll();
+  modal('Configurações',
+    '<label for="stName" style="margin-top:0">Nome</label><input id="stName" maxlength="60" value="'+esc(state.user.name)+'">'+
+    '<button class="btn sm" style="width:100%;margin-top:8px" onclick="saveName()">Salvar nome</button>'+
+    '<label>E-mail</label><input value="'+esc(state.user.email||'')+'" readonly>'+
+    '<div class="note">Seu e-mail não é mostrado a outros usuários.</div>'+
+    '<button class="link" onclick="openTerms()">Termos de uso e privacidade</button>'+
+    '<button class="btn danger" onclick="confirmDeleteAccount()">Excluir minha conta</button>','Fechar',true);
+}
+async function saveName(){
+  const name=$('stName').value.trim();
+  if(name.length<2)return toast('O nome precisa ter pelo menos 2 letras.');
+  const {error}=await sb.from('profiles').update({name}).eq('id',state.user.id);
+  if(error)return toast(dbErr(error));
+  state.user.name=name;toast('Nome atualizado');
+}
+function confirmDeleteAccount(){
+  modal('Excluir conta?',
+    '<p>Isso apaga de forma definitiva seu perfil, seus grupos, suas solicitações e seus bloqueios. Não dá para desfazer.</p>'+
+    '<label for="delConfirm">Para confirmar, digite <b>EXCLUIR</b></label><input id="delConfirm" autocapitalize="characters">'+
+    '<button class="btn danger" id="delBtn" onclick="deleteAccount()">Excluir definitivamente</button>','Cancelar',true);
+}
+async function deleteAccount(){
+  if($('delConfirm').value.trim().toUpperCase()!=='EXCLUIR')return toast('Digite EXCLUIR para confirmar.');
+  await busy('delBtn',async()=>{
+    const {error}=await sb.rpc('delete_my_account');
+    if(error)return toast(dbErr(error,'Não foi possível excluir a conta. Tente novamente.'));
+    /* a conta já não existe no servidor: limpa só a sessão deste navegador */
+    try{await sb.auth.signOut({scope:'local'})}catch(e){}
+    try{localStorage.removeItem(seenKey())}catch(e){}
+    state.logged=false;state.editing=false;
+    Object.assign(state.user,{id:null,name:'',email:'',cep:'',hood:'',lat:null,lng:null,days:[],periods:[],mods:[{sport:'',level:''}],onboarded:false});
+    state.groups=[];state.myRequests=[];state.myGroups=[];state.notifs=[];state.cands=[];updateBell();
+    closeAll();go('welcome');toast('Sua conta e seus dados foram excluídos.');
+  });
+}
 function openHelp(){closeAll();modal('Ajuda','<p>Dúvidas sobre grupos, solicitações ou segurança? Em breve você poderá falar com nosso time por aqui.</p>')}
-function logout(){closeAll();state.logged=false;state.editing=false;go('welcome')}
+async function logout(){
+  closeAll();
+  await sb.auth.signOut();
+  state.logged=false;state.editing=false;
+  Object.assign(state.user,{id:null,name:'',email:'',cep:'',hood:'',lat:null,lng:null,days:[],periods:[],mods:[{sport:'',level:''}],onboarded:false});state.addr=null;
+  state.groups=[];state.myRequests=[];state.myGroups=[];state.notifs=[];state.cands=[];updateBell();
+  go('welcome');
+}
+function openTerms(){
+  modal('Termos de uso e privacidade',
+    '<p><strong>O que coletamos:</strong> nome, e-mail, CEP, bairro, modalidades, nível e disponibilidade. Não coletamos telefone.</p>'+
+    '<p><strong>Para quê:</strong> mostrar grupos perto de você e permitir que organizadores avaliem se você combina com o grupo.</p>'+
+    '<p><strong>Quem vê o quê:</strong> outros usuários veem seu nome, bairro, modalidades, nível e disponibilidade. Seu e-mail, CEP e localização exata não são mostrados a ninguém. O link do grupo no WhatsApp só é liberado a quem o organizador aceitar.</p>'+
+    '<p><strong>Seus direitos (LGPD):</strong> você pode corrigir seu perfil a qualquer momento e excluir sua conta, o que apaga seus dados da plataforma.</p>'+
+    '<p><strong>Convivência:</strong> comportamentos ofensivos podem ser denunciados; denúncias são revisadas pela equipe.</p>');
+}
+/* Desabilita o botão enquanto a requisição está em andamento (evita clique duplo) */
+async function busy(btnId,fn){
+  const b=$(btnId),txt=b.textContent;b.disabled=true;b.textContent='Aguarde…';
+  try{return await fn()}finally{b.disabled=false;b.textContent=txt}
+}
+/* Mensagens de erro do Supabase traduzidas para o usuário */
+function authErr(e){
+  const m=(e&&e.message)||'';
+  if(/Invalid login credentials/i.test(m))return 'E-mail ou senha incorretos.';
+  if(/Email not confirmed/i.test(m))return 'Confirme seu e-mail antes de entrar.';
+  if(/already registered|already been registered/i.test(m))return 'Este e-mail já tem conta. Use "Já tenho conta".';
+  if(/expired|invalid.*(otp|token)|token.*(expired|invalid)/i.test(m))return 'Código inválido ou expirado. Peça um novo.';
+  if(/rate limit|too many|security purposes/i.test(m))return 'Muitas tentativas. Aguarde alguns minutos e tente de novo.';
+  if(/termos/i.test(m))return 'É preciso aceitar os termos de uso.';
+  if(/Password/i.test(m))return 'Senha fraca. Use pelo menos 8 caracteres.';
+  if(/fetch|network/i.test(m))return 'Sem conexão. Verifique sua internet.';
+  return 'Algo deu errado. Tente novamente.';
+}
 
-/* ---------- notificações ---------- */
-function addNotif(icon,title,text,tab){
-  state.notifs.unshift({icon,title,text,tab,read:false,time:new Date()});
+/* ---------- notificações ----------
+   Calculadas a partir dos dados reais: respostas às minhas solicitações e
+   candidatos aguardando nos meus grupos. O que já foi visto fica guardado
+   neste navegador (localStorage), só como conveniência. */
+const seenKey=()=>'qc_vistos_'+state.user.id;
+function getSeen(){try{return JSON.parse(localStorage.getItem(seenKey())||'{}')}catch(e){return {}}}
+function setSeen(o){try{localStorage.setItem(seenKey(),JSON.stringify(o))}catch(e){}}
+async function refreshNotifs(){
+  if(!state.logged||!state.user.id)return;
+  await Promise.all([loadMyRequests(),loadMyGroups()]);
+  const seen=getSeen(),list=[];
+  state.myRequests.forEach(r=>{
+    const t=new Date(r.decided_at||r.created_at);
+    if(r.status==='accepted')list.push({key:'r'+r.id+'a',icon:'✅',title:'Solicitação aceita',text:'O organizador de '+esc(r.group.name)+' aceitou você. O link do grupo está em Atividade.',tab:'req',time:t});
+    if(r.status==='declined')list.push({key:'r'+r.id+'d',icon:'❌',title:'Solicitação recusada',text:'Dessa vez não foi possível entrar em '+esc(r.group.name)+'. Veja outras vagas perto de você.',tab:'req',time:t});
+  });
+  state.myGroups.forEach(g=>{
+    if(g.pending>0)list.push({key:'g'+g.id+'p'+g.pending,icon:'🙋',title:'Candidatos aguardando',text:g.pending+(g.pending===1?' pessoa pediu':' pessoas pediram')+' para entrar em '+esc(g.name)+'.',tab:'mine',time:new Date()});
+  });
+  list.sort((a,b)=>b.time-a.time);
+  const unreadBefore=new Set(state.notifs.filter(n=>!n.read).map(n=>n.key));
+  state.notifs=list.map(n=>({...n,read:!!seen[n.key]}));
+  const fresh=state.notifs.find(n=>!n.read&&!unreadBefore.has(n.key));
   updateBell();
-  if(state.logged)toast('🔔 '+title);
+  if(fresh)toast('🔔 '+fresh.title);
   if($('notifications').classList.contains('active'))renderNotifs();
+  if($('activity').classList.contains('active'))renderActivity();
 }
 function updateBell(){
   const n=state.notifs.filter(x=>!x.read).length;
@@ -423,62 +518,148 @@ function renderNotifs(){
   box.innerHTML=state.notifs.map((n,i)=>
     '<div class="notif'+(n.read?'':' unread')+'" onclick="openNotif('+i+')"><div class="ic">'+n.icon+'</div><div><b>'+n.title+'</b><div class="meta">'+n.text+'</div><div class="t">'+timeAgo(n.time)+'</div></div></div>'
   ).join('');
-  state.notifs.forEach(n=>n.read=true);updateBell();
+  const seen=getSeen();state.notifs.forEach(n=>{n.read=true;seen[n.key]=1});setSeen(seen);updateBell();
 }
-function timeAgo(d){const s=Math.round((Date.now()-d)/1000);if(s<60)return 'agora';return 'há '+Math.round(s/60)+' min'}
+function timeAgo(d){
+  const s=Math.round((Date.now()-d)/1000);
+  if(s<60)return 'agora';if(s<3600)return 'há '+Math.round(s/60)+' min';
+  if(s<86400)return 'há '+Math.round(s/3600)+' h';const n=Math.round(s/86400);return 'há '+n+(n===1?' dia':' dias');
+}
 function openNotif(i){const n=state.notifs[i];state.tab=n.tab||'req';go('activity')}
 
-/* ---------- cadastro / login ---------- */
-function maskPhone(v){
-  const d=v.replace(/\D/g,'').slice(0,11);
-  if(d.length<=2)return d.length?'('+d:'';
-  if(d.length<=6)return '('+d.slice(0,2)+') '+d.slice(2);
-  if(d.length<=10)return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
-  return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
-}
-$('suPhone').addEventListener('input',e=>{e.target.value=maskPhone(e.target.value)});
+/* ---------- cadastro / login (Supabase Auth) ---------- */
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-function doSignup(){
-  const n=$('suName').value.trim(),err=$('suErr');
+async function doSignup(){
+  const name=$('suName').value.trim(),email=$('suEmail').value.trim().toLowerCase(),pass=$('suPass').value,err=$('suErr');
+  if(name.length<2)return err.textContent='Informe seu nome.';
+  if(!EMAIL_RE.test(email))return err.textContent='Informe um e-mail válido.';
+  if(pass.length<8)return err.textContent='A senha precisa ter pelo menos 8 caracteres.';
+  if(!$('suTerms').checked)return err.textContent='Para continuar, aceite os termos de uso e a política de privacidade.';
   err.textContent='';
-  Object.assign(state.user,{name:n,email:$('suEmail').value.trim(),phone:$('suPhone').value});
-  go('verify');
+  await busy('suBtn',async()=>{
+    /* name e accepted_terms vão para o banco; o gatilho handle_new_user recusa o cadastro sem aceite */
+    const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name,accepted_terms:true}}});
+    if(error)return err.textContent=authErr(error);
+    /* Supabase não revela se o e-mail já existe (evita descobrir quem tem conta):
+       nesse caso devolve um usuário sem identidades. */
+    if(data.user&&data.user.identities&&data.user.identities.length===0)
+      return err.textContent='Este e-mail já tem conta. Use "Já tenho conta".';
+    state.user.email=email;
+    $('vEmail').textContent=email;$('vCode').value='';$('vErr').textContent='';
+    go('verify');
+  });
 }
-function doVerify(){
-  const err=$('vErr');
-  if($('vCode').value.replace(/\D/g,'').length!==6)return err.textContent='Digite o código de 6 dígitos.';
-  err.textContent='';state.logged=true;state.editing=false;
-  $('pfTitle').textContent='Monte seu perfil';$('pfBtn').textContent='Concluir';
-  renderMods();go('profile');
+async function doVerify(){
+  const err=$('vErr'),token=$('vCode').value.replace(/\D/g,'');
+  if(token.length<6)return err.textContent='Digite o código que chegou no seu e-mail.';
+  err.textContent='';
+  await busy('vBtn',async()=>{
+    const {error}=await sb.auth.verifyOtp({email:state.user.email,token,type:'signup'});
+    if(error)return err.textContent=authErr(error);
+    await afterLogin();
+  });
 }
-function doLogin(){
-  const em=$('lgEmail').value.trim(),pw=$('lgPass').value,err=$('lgErr');
-  if(!em||!pw)return err.textContent='Informe e-mail e senha.';
-  err.textContent='';state.logged=true;
-  if(!state.user.name)state.user.name=em.split('@')[0];
-  go('search');
+async function resendCode(){
+  if(!state.user.email)return go('signup');
+  const {error}=await sb.auth.resend({type:'signup',email:state.user.email});
+  toast(error?authErr(error):'Enviamos um novo código');
+}
+async function doLogin(){
+  const email=$('lgEmail').value.trim().toLowerCase(),pass=$('lgPass').value,err=$('lgErr');
+  if(!email||!pass)return err.textContent='Informe e-mail e senha.';
+  err.textContent='';
+  await busy('lgBtn',async()=>{
+    const {error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error){
+      if(/Email not confirmed/i.test(error.message)){
+        /* conta criada mas não verificada: reenvia o código e leva à verificação */
+        state.user.email=email;$('vEmail').textContent=email;$('vCode').value='';
+        await sb.auth.resend({type:'signup',email});
+        go('verify');return toast('Confirme seu e-mail com o código que enviamos');
+      }
+      return err.textContent=authErr(error);
+    }
+    $('lgPass').value='';
+    await afterLogin();
+  });
+}
+/* Depois de entrar: carrega o perfil e decide se a pessoa ainda precisa montá-lo */
+async function afterLogin(){
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user)return go('welcome');
+  state.logged=true;state.user.id=user.id;state.user.email=user.email;
+  await loadProfile();
+  if(!state.user.onboarded){
+    state.editing=false;
+    $('pfTitle').textContent='Monte seu perfil';$('pfBtn').textContent='Concluir';
+    fillProfileForm();go('profile');
+  }else go('search');
+  refreshNotifs();
 }
 
 /* ---------- perfil ---------- */
-function previewPhoto(inp){
-  const f=inp.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=e=>{state.user.photo=e.target.result;$('photoBox').innerHTML='<img src="'+e.target.result+'" alt="Foto de perfil">'};
-  r.readAsDataURL(f);
+/* Consulta o CEP: AwesomeAPI devolve endereço E coordenadas; se falhar, ViaCEP devolve só o endereço.
+   Os valores vão para campos de formulário (.value), nunca para innerHTML. */
+async function fetchCep(digits){
+  try{
+    const r=await fetch('https://cep.awesomeapi.com.br/json/'+digits);
+    if(r.ok){
+      const j=await r.json(),lat=parseFloat(j.lat),lng=parseFloat(j.lng);
+      if(j.district||j.address)return {street:j.address||'',hood:j.district||'',city:j.city||'',
+        lat:Number.isFinite(lat)?lat:null,lng:Number.isFinite(lng)?lng:null};
+    }
+  }catch(e){}
+  try{
+    const r=await fetch('https://viacep.com.br/ws/'+digits+'/json/');
+    if(r.ok){const j=await r.json();if(!j.erro)return {street:j.logradouro||'',hood:j.bairro||'',city:j.localidade||'',lat:null,lng:null}}
+  }catch(e){}
+  return null;
 }
-function onCepInput(inp){
+let cepSeq=0;
+async function onCepInput(inp){
   let v=inp.value.replace(/\D/g,'').slice(0,8);
   if(v.length>5)v=v.slice(0,5)+'-'+v.slice(5);
   inp.value=v;
   const digits=v.replace(/\D/g,'');
-  if(digits.length<8){$('pfStreet').value='';$('pfHood').value='';return}
-  const a=CEPS[digits];
-  if(a){$('pfStreet').value=a.street;$('pfHood').value=a.hood;toast('Endereço preenchido pelo CEP')}
-  else{
-    /* protótipo: qualquer outro CEP recebe um endereço de exemplo para o teste não travar */
-    $('pfStreet').value='Rua Augusta';$('pfHood').value='Consolação';
-    toast('Protótipo: endereço de exemplo');
-  }
+  const seq=++cepSeq;   /* descarta respostas atrasadas se a pessoa continuar digitando */
+  state.addr=null;$('pfStreet').value='';$('pfHood').value='';$('pfCity').value='';
+  if(digits.length<8)return;
+  $('pfStreet').value='Buscando endereço…';
+  const a=await fetchCep(digits);
+  if(seq!==cepSeq)return;
+  if(!a){$('pfStreet').value='';return toast('CEP não encontrado. Confira os números.')}
+  state.addr=a;
+  $('pfStreet').value=a.street||'(sem rua para este CEP)';$('pfHood').value=a.hood;$('pfCity').value=a.city;
+  if(a.city&&a.city!=='São Paulo')toast('Por enquanto os grupos estão só na cidade de São Paulo');
+}
+function renderAvail(){
+  const draw=(boxId,opts,key,short)=>{
+    const box=$(boxId);box.innerHTML='';
+    opts.forEach(o=>{
+      const c=document.createElement('div');c.className='chip'+(state.user[key].includes(o)?' on':'');
+      c.textContent=short?short[o]:o;
+      c.onclick=()=>{const a=state.user[key],i=a.indexOf(o);i>-1?a.splice(i,1):a.push(o);renderAvail()};
+      box.append(c);
+    });
+  };
+  draw('pfDays',DAYS_FULL,'days',DAYS_SHORT);draw('pfPeriods',PERIODS,'periods');
+}
+/* Carrega o perfil completo do banco para o estado da tela */
+async function loadProfile(){
+  const uid=state.user.id;
+  const [p,pr,sp]=await Promise.all([
+    sb.from('profiles').select('name,hood,days,periods').eq('id',uid).maybeSingle(),
+    sb.from('profiles_private').select('cep,lat,lng').eq('id',uid).maybeSingle(),
+    sb.from('profile_sports').select('sport,level').eq('user_id',uid)
+  ]);
+  const prof=p.data||{},priv=pr.data||{},mods=sp.data||[];
+  Object.assign(state.user,{
+    name:prof.name||'Atleta',hood:prof.hood||'',days:prof.days||[],periods:prof.periods||[],
+    cep:priv.cep||'',lat:priv.lat??null,lng:priv.lng??null,
+    mods:mods.length?mods.map(m=>({sport:m.sport,level:m.level})):[{sport:'',level:''}],
+    onboarded:mods.length>0
+  });
 }
 function renderMods(){
   const rows=state.user.mods;const box=$('modRows');box.innerHTML='';
@@ -499,27 +680,50 @@ function renderMods(){
   $('addMod').style.display=rows.length>=SPORTS.length?'none':'inline-block';
 }
 function addMod(){state.user.mods.push({sport:'',level:''});renderMods()}
-function saveProfile(){
-  const err=$('pfErr');
-  const cep=$('pfCep').value.replace(/\D/g,'');
-  const street=$('pfStreet').value.trim(),hood=$('pfHood').value.trim();
+async function saveProfile(){
+  const err=$('pfErr'),u=state.user;
+  const cepMasked=$('pfCep').value,cep=cepMasked.replace(/\D/g,'');
   if(cep.length!==8)return err.textContent='Informe um CEP válido.';
-  if(!street||!hood)return err.textContent='Digite o CEP para preencher o endereço.';
-  if(state.user.mods.some(m=>!m.sport||!m.level))return err.textContent='Escolha modalidade e nível em todos os campos.';
+  /* state.addr = endereço recém-consultado; sem ele, mantém o que já estava salvo (edição sem trocar CEP) */
+  const addr=state.addr||(cepMasked===u.cep&&u.hood?{hood:u.hood,lat:u.lat,lng:u.lng}:null);
+  if(!addr||!addr.hood)return err.textContent='Aguarde o endereço ser preenchido pelo CEP.';
+  if(u.mods.some(m=>!m.sport||!m.level))return err.textContent='Escolha modalidade e nível em todos os campos.';
+  if(!u.days.length||!u.periods.length)return err.textContent='Escolha pelo menos um dia e um período em que você pode jogar.';
   err.textContent='';
-  state.user.cep=$('pfCep').value;state.user.street=street;state.user.hood=hood;
-  const wasEditing=state.editing,first=!state.user.onboarded;
-  state.editing=false;state.user.onboarded=true;
-  go('search');
-  if(wasEditing)toast('Perfil salvo');
-  if(first)addNotif('👋','Boas-vindas ao Quadra Cheia','Seu perfil está pronto. Encontre uma vaga perto de '+hood+'.','req');
+  await busy('pfBtn',async()=>{
+    const uid=u.id,sports=u.mods.map(m=>m.sport);
+    /* modalidades: primeiro grava/atualiza as escolhidas, depois remove as que saíram
+       (nessa ordem, uma falha no meio nunca deixa o perfil sem modalidades) */
+    const steps=[
+      ()=>sb.from('profiles').update({hood:addr.hood,days:u.days,periods:u.periods}).eq('id',uid),
+      ()=>sb.from('profiles_private').update({cep:cepMasked,lat:addr.lat,lng:addr.lng}).eq('id',uid),
+      ()=>sb.from('profile_sports').upsert(u.mods.map(m=>({user_id:uid,sport:m.sport,level:m.level})),{onConflict:'user_id,sport'}),
+      ()=>sb.from('profile_sports').delete().eq('user_id',uid).not('sport','in','('+sports.map(s=>'"'+s+'"').join(',')+')')
+    ];
+    for(const step of steps){
+      const {error}=await step();
+      if(error){console.error(error);return err.textContent='Não foi possível salvar. Tente novamente.'}
+    }
+    Object.assign(u,{cep:cepMasked,hood:addr.hood,lat:addr.lat,lng:addr.lng});
+    state.addr=null;
+    const wasEditing=state.editing,first=!u.onboarded;
+    state.editing=false;u.onboarded=true;
+    go('search');
+    if(wasEditing)toast('Perfil salvo');
+    if(first)toast('Perfil pronto! Veja as vagas perto de você.');
+  });
+}
+function fillProfileForm(){
+  const u=state.user;state.addr=null;
+  $('pfCep').value=u.cep||'';$('pfHood').value=u.hood||'';
+  $('pfStreet').value=u.cep?'(salvo; digite outro CEP para trocar)':'';
+  $('pfCity').value='';
+  renderMods();renderAvail();
 }
 function openProfile(){
   closeAll();state.editing=true;
   $('pfTitle').textContent='Seu perfil';$('pfBtn').textContent='Salvar';
-  $('pfCep').value=state.user.cep;$('pfStreet').value=state.user.street;$('pfHood').value=state.user.hood;
-  renderMods();
-  if(state.user.photo)$('photoBox').innerHTML='<img src="'+state.user.photo+'" alt="Foto de perfil">';
+  fillProfileForm();
   go('profile');
 }
 
@@ -554,212 +758,366 @@ function renderMs(){
     }
   });
 }
+const hhmm=t=>String(t||'').slice(0,5);
 function getPeriod(time){
-  const h=Number(time.split(':')[0]);
+  const h=Number(String(time).split(':')[0]);
   if(h<12)return 'Manhã';
   if(h<18)return 'Tarde';
   return 'Noite';
 }
-function statusHtml(g,mt){
-  const st=mt?'margin-top:'+mt+'px':'';
-  return g.confirmed
-    ?'<div class="meta ok" style="'+st+'">● '+g.active+'</div>'
-    :'<div class="meta" style="'+st+'">○ Aguardando confirmação do organizador</div>';
+/* Distância em linha reta (fórmula de Haversine) entre o CEP do usuário e o CEP da quadra */
+function kmBetween(a,b){
+  if(a.lat==null||a.lng==null||b.lat==null||b.lng==null)return null;
+  const R=6371,r=x=>x*Math.PI/180,dLat=r(b.lat-a.lat),dLng=r(b.lng-a.lng);
+  const h=Math.sin(dLat/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
 }
-function allGroups(){return GROUPS.concat(state.myGroups.filter(g=>g.listed))}
+const kmTxt=km=>km==null?'distância indisponível':km.toFixed(1).replace('.',',')+' km';
+const spotsTxt=n=>n<=0?'Lotado':n+(n===1?' vaga':' vagas');
+/* Status de atividade recente: evita anúncio "morto" (dor da Larissa na jornada da Fase 2) */
+function activityOf(g){
+  if(!g.confirmed_at)return {ok:false,txt:'Aguardando confirmação do organizador'};
+  const d=Math.floor((Date.now()-new Date(g.confirmed_at))/864e5);
+  if(d>14)return {ok:false,txt:'Sem partida confirmada há mais de 2 semanas'};
+  return {ok:true,txt:'Partida confirmada '+(d<=0?'hoje':d===1?'ontem':'há '+d+' dias')};
+}
+function statusHtml(g,mt){
+  const a=activityOf(g),st=mt?'margin-top:'+mt+'px':'';
+  return '<div class="meta'+(a.ok?' ok':'')+'" style="'+st+'">'+(a.ok?'● ':'○ ')+a.txt+'</div>';
+}
+function dbErr(error,fallback){
+  console.error(error);
+  const m=(error&&error.message)||'';
+  if(/vagas/i.test(m))return 'Todas as vagas deste grupo já foram preenchidas.';
+  if(/fetch|network/i.test(m))return 'Sem conexão. Verifique sua internet.';
+  return fallback||'Algo deu errado. Tente novamente.';
+}
+const WA_RE=/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+$/;
+/* Convites às vezes vêm com "?mode=..." no fim; guardamos só o endereço do convite */
+const cleanLink=v=>v.trim().split('?')[0].replace(/\/+$/,'');
+
+/* ---------- busca ---------- */
+const GROUP_COLS='id,name,sport,hood,lat,lng,day,start_time,level,format,spots,cost,rules,confirmed_at,listed,organizer_id,spots_left,organizer:profiles(name)';
+async function loadSearch(){
+  if(!state.logged)return;
+  if(!state.groups.length)$('results').innerHTML='<div class="empty">Buscando vagas…</div>';
+  const {data,error}=await sb.from('groups').select(GROUP_COLS).eq('listed',true).neq('organizer_id',state.user.id);
+  if(error){$('results').innerHTML='<div class="empty">Não foi possível carregar as vagas.<br>'+esc(dbErr(error))+'</div>';return}
+  state.groups=(data||[]).map(g=>({...g,km:kmBetween(state.user,g)}));
+  applyFilters();
+}
 function applyFilters(){
   const f=state.filters;f.km=+$('fKm').value;$('kmVal').textContent=f.km;
   renderSportChips();renderMs();
-  const list=allGroups().filter(g=>
+  const list=state.groups.filter(g=>
+    g.spots_left>0&&
     (f.sport==='Todos'||g.sport===f.sport)&&
     (!f.days.length||f.days.includes(g.day))&&
-    (!f.periods.length||f.periods.includes(getPeriod(g.time)))&&
+    (!f.periods.length||f.periods.includes(getPeriod(g.start_time)))&&
     (!f.levels.length||f.levels.includes(g.level)||g.level==='Todos os níveis')&&
-    g.km<=f.km
-  ).sort((a,b)=>a.km-b.km);
+    (g.km==null||g.km<=f.km)
+  ).sort((a,b)=>(a.km??1e9)-(b.km??1e9));
   const box=$('results');
-  if(!list.length){box.innerHTML='<div class="empty">Nenhuma vaga encontrada com esses filtros.<br>Tente aumentar a distância ou escolher mais dias e períodos.</div>';return}
+  if(!list.length){
+    box.innerHTML=state.groups.some(g=>g.spots_left>0)
+      ?'<div class="empty">Nenhuma vaga encontrada com esses filtros.<br>Tente aumentar a distância ou escolher mais dias e períodos.</div>'
+      :'<div class="empty">Ainda não há vagas abertas.<br>Organiza um jogo? Toque em Criar grupo.</div>';
+    return;
+  }
   box.innerHTML=list.map(g=>
-    '<div class="card" onclick="openGroup('+g.id+')"><div class="top"><span class="tag">'+g.sport+'</span><span class="ok">'+g.spots+(g.spots===1?' vaga':' vagas')+'</span></div>'+
-    '<h3>'+g.name+'</h3><div class="meta">'+g.hood+' · '+g.km.toFixed(1).replace('.',',')+' km<br>'+g.day+', '+g.time+' ('+getPeriod(g.time)+') · '+g.level+'</div>'+
+    '<div class="card" onclick="openGroup('+g.id+')"><div class="top"><span class="tag">'+esc(g.sport)+'</span><span class="ok">'+spotsTxt(g.spots_left)+'</span></div>'+
+    '<h3>'+esc(g.name)+'</h3><div class="meta">'+esc(g.hood)+' · '+kmTxt(g.km)+'<br>'+esc(g.day)+', '+hhmm(g.start_time)+' ('+getPeriod(g.start_time)+') · '+esc(g.level)+' · '+esc(g.format)+'</div>'+
     statusHtml(g,6)+
     '<div class="more">Ver detalhes ›</div></div>'
   ).join('');
 }
 
 /* ---------- detalhe do grupo ---------- */
-function openGroup(id){
-  const g=allGroups().find(x=>x.id===id);state.currentGroup=g;
-  const req=state.requests.find(r=>r.gid===id);
+async function openGroup(id){
+  const [{data,error}]=await Promise.all([sb.from('groups').select(GROUP_COLS).eq('id',id).maybeSingle(),loadMyRequests()]);
+  if(error||!data)return toast('Este grupo não está mais disponível.');
+  const g={...data,km:kmBetween(state.user,data)};state.currentGroup=g;
+  const req=state.myRequests.find(r=>r.group.id===id);
+  const mine=g.organizer_id===state.user.id;
   let action;
-  if(!req)action='<label>Mensagem para o organizador (opcional)</label><textarea id="reqMsg" rows="2" placeholder="Ex.: Estou voltando a jogar e sou iniciante."></textarea><button class="btn" onclick="sendRequest('+id+')">Solicitar entrada</button>';
-  else action='<button class="btn sec" onclick="state.tab=\'req\';go(\'activity\')">Solicitação enviada · ver em Atividade</button>';
-  $('group').innerHTML='<span class="tag" style="align-self:flex-start">'+g.sport+'</span>'+
-   '<h2 style="margin-top:10px">'+g.name+'</h2>'+
-   '<div class="meta">Organizado por '+g.org+' · <span class="badge">✔ Perfil verificado</span></div>'+
+  if(mine)action='<div class="note">Você organiza este grupo.</div><button class="btn sec" onclick="state.tab=\'mine\';go(\'activity\')">Ver candidatos em Atividade</button>';
+  else if(!req&&g.spots_left>0)action='<label for="reqMsg">Mensagem para o organizador (opcional)</label><textarea id="reqMsg" rows="2" maxlength="300" placeholder="Ex.: Estou voltando a jogar e sou iniciante."></textarea><button class="btn" id="reqBtn" onclick="sendRequest('+id+')">Solicitar entrada</button>';
+  else if(!req)action='<div class="note">Este grupo está lotado no momento.</div>';
+  else if(req.status==='pending')action='<button class="btn sec" onclick="state.tab=\'req\';go(\'activity\')">Solicitação enviada · aguardando resposta</button>';
+  else if(req.status==='accepted')action='<button class="btn" onclick="joinWhats('+id+')">Entrar no grupo do WhatsApp</button>';
+  else action='<div class="note">O organizador não aceitou sua solicitação para este grupo.</div>';
+  $('group').innerHTML='<span class="tag" style="align-self:flex-start">'+esc(g.sport)+'</span>'+
+   '<h2 style="margin-top:10px">'+esc(g.name)+'</h2>'+
+   '<div class="meta">Organizado por '+esc(g.organizer?g.organizer.name:'Organizador')+' · <span class="badge">✔ E-mail verificado</span></div>'+
    statusHtml(g,6)+
-   '<div class="info-grid"><div><b>Local</b>'+g.hood+' · '+g.km.toFixed(1).replace('.',',')+' km</div><div><b>Quando</b>'+g.day+', '+g.time+' ('+getPeriod(g.time)+')</div><div><b>Nível</b>'+g.level+'</div><div><b>Vagas</b>'+g.spots+'</div><div style="grid-column:1/-1"><b>Custo</b>'+g.cost+'</div></div>'+
-   '<label style="margin-top:0">Regras do grupo</label><p class="meta" style="font-size:14px">'+g.rules+'</p>'+
+   '<div class="info-grid"><div><b>Local</b>'+esc(g.hood)+' · '+kmTxt(g.km)+'</div><div><b>Quando</b>'+esc(g.day)+', '+hhmm(g.start_time)+' ('+getPeriod(g.start_time)+')</div>'+
+   '<div><b>Nível</b>'+esc(g.level)+'</div><div><b>Vagas</b>'+spotsTxt(g.spots_left)+' de '+g.spots+'</div>'+
+   '<div><b>Formato</b>'+esc(g.format)+'</div><div><b>Custo</b>'+esc(g.cost)+'</div></div>'+
+   (g.rules?'<label style="margin-top:0">Regras e como funciona</label><p class="meta" style="font-size:14px;white-space:pre-line">'+esc(g.rules)+'</p>':'')+
    action+
-   '<div class="note">Seu telefone não é exibido. O link da comunidade no WhatsApp é liberado somente após o aceite do organizador.</div>'+
-   '<button class="link" onclick="openReport()">Denunciar ou bloquear</button>';
+   '<div class="note">Seu telefone e seu e-mail não são exibidos. O link da comunidade no WhatsApp é liberado somente após o aceite do organizador.</div>'+
+   (mine?'':'<button class="link" onclick="openReport(\''+g.organizer_id+'\','+g.id+',\'organizador\')">Denunciar ou bloquear</button>');
   go('group');
 }
-function sendRequest(id){
-  state.requests.push({gid:id,status:'pending'});
-  toast('Solicitação enviada');openGroup(id);
+async function sendRequest(id){
+  const msg=($('reqMsg')?$('reqMsg').value:'').trim().slice(0,300);
+  await busy('reqBtn',async()=>{
+    const {error}=await sb.from('join_requests').insert({group_id:id,user_id:state.user.id,message:msg||null});
+    if(error){
+      if(/duplicate|unique/i.test(error.message))toast('Você já pediu para entrar neste grupo.');
+      else toast(dbErr(error,'Não foi possível pedir entrada. O grupo pode ter lotado.'));
+      return;
+    }
+    toast('Solicitação enviada');
+    await openGroup(id);refreshNotifs();
+  });
 }
-function openReport(){
-  modal('Denunciar ou bloquear','<p>O que você deseja fazer?</p><button class="btn danger" onclick="closeAll();toast(\'Denúncia enviada. Obrigado!\')">Denunciar comportamento</button><button class="btn danger" onclick="closeAll();toast(\'Usuário bloqueado\')">Bloquear organizador</button><div style="height:6px"></div>');
+async function joinWhats(gid){
+  const {data,error}=await sb.from('group_secrets').select('whatsapp_link').eq('group_id',gid).maybeSingle();
+  if(error)return toast(dbErr(error));
+  if(!data)return modal('Link ainda não disponível','<p>O organizador ainda não adicionou o link da comunidade. Tente novamente mais tarde.</p>');
+  modal('Você está no grupo 🎉','<p>Entre na comunidade do WhatsApp para combinar os jogos com a turma.</p>'+
+    '<a class="btn" style="display:block;text-align:center;text-decoration:none" href="'+esc(data.whatsapp_link)+'" target="_blank" rel="noopener noreferrer">Abrir comunidade no WhatsApp</a>','Fechar',true);
+}
+
+/* ---------- denúncia e bloqueio ---------- */
+function openReport(userId,groupId,label){
+  state.reportCtx={userId,groupId,label};
+  modal('Denunciar ou bloquear',
+    '<p>Conte o que aconteceu. A equipe revisa todas as denúncias.</p>'+
+    '<textarea id="rpReason" rows="3" maxlength="500" placeholder="Descreva o comportamento"></textarea>'+
+    '<button class="btn danger" onclick="sendReport()">Enviar denúncia</button>'+
+    '<button class="btn danger" onclick="confirmBlock()">Bloquear '+esc(label)+'</button>'+
+    '<p class="meta" style="margin-top:10px">Ao bloquear, vocês deixam de ver os grupos e perfis um do outro. A outra pessoa não é avisada.</p>','Cancelar',true);
+}
+async function sendReport(){
+  const reason=$('rpReason').value.trim(),c=state.reportCtx;
+  if(reason.length<3)return toast('Descreva em poucas palavras o que aconteceu.');
+  const {error}=await sb.from('reports').insert({reporter_id:state.user.id,reported_user_id:c.userId,group_id:c.groupId||null,reason});
+  closeAll();toast(error?dbErr(error):'Denúncia enviada. Obrigado!');
+}
+async function confirmBlock(){
+  const c=state.reportCtx;
+  const {error}=await sb.from('blocks').insert({blocker_id:state.user.id,blocked_id:c.userId});
+  closeAll();
+  if(error&&!/duplicate|unique/i.test(error.message))return toast(dbErr(error));
+  toast('Bloqueado. Vocês não veem mais um ao outro.');
+  if($('candidates').classList.contains('active'))loadCandidates();else go('search');
 }
 
 /* ---------- atividade ---------- */
+async function loadMyRequests(){
+  const {data,error}=await sb.from('join_requests')
+    .select('id,status,message,created_at,decided_at,group:groups(id,name,sport,hood,day,start_time,organizer_id)')
+    .eq('user_id',state.user.id).order('created_at',{ascending:false});
+  if(!error)state.myRequests=(data||[]).filter(r=>r.group);
+  return error;
+}
+async function loadMyGroups(){
+  const {data,error}=await sb.from('groups')
+    .select('id,name,sport,hood,day,start_time,level,format,spots,cost,rules,confirmed_at,listed,spots_left,join_requests(status)')
+    .eq('organizer_id',state.user.id).order('created_at',{ascending:false});
+  if(!error)state.myGroups=(data||[]).map(g=>({...g,pending:(g.join_requests||[]).filter(r=>r.status==='pending').length}));
+  return error;
+}
+async function loadActivity(){
+  if(!state.myRequests.length&&!state.myGroups.length)$('activityList').innerHTML='<div class="empty">Carregando…</div>';
+  const [e1,e2]=await Promise.all([loadMyRequests(),loadMyGroups()]);
+  if(e1||e2)return $('activityList').innerHTML='<div class="empty">Não foi possível carregar.<br>'+esc(dbErr(e1||e2))+'</div>';
+  renderActivity();
+}
 function setTab(t){state.tab=t;renderActivity()}
+const STATUS_LBL={pending:'Aguardando',accepted:'Aceito',declined:'Recusado'};
 function renderActivity(){
   $('tabReq').classList.toggle('on',state.tab==='req');$('tabMine').classList.toggle('on',state.tab==='mine');
   const box=$('activityList');
   if(state.tab==='req'){
-    if(!state.requests.length){box.innerHTML='<div class="empty">Você ainda não solicitou entrada em nenhum grupo.<br>Use a aba Buscar para encontrar vagas.</div>';return}
-    box.innerHTML=state.requests.map((r,i)=>{
-      const g=allGroups().find(x=>x.id===r.gid);
-      const lbl={pending:'Aguardando',accepted:'Aceito',declined:'Recusado'}[r.status];
-      let extra='';
-      if(r.status==='pending')extra=
-        '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn sec sm" style="flex:1" onclick="event.stopPropagation();simulate('+i+',\'accepted\')">Simular aceite</button><button class="btn sec sm" style="flex:1" onclick="event.stopPropagation();simulate('+i+',\'declined\')">Simular recusa</button></div>'+
-        '<div class="meta" style="margin-top:6px;font-size:11.5px">Botões acima só para o protótipo.</div>'+
-        '<button class="btn danger sm" style="width:100%;margin-top:10px" onclick="event.stopPropagation();confirmCancel('+i+')">Cancelar solicitação</button>';
+    if(!state.myRequests.length){box.innerHTML='<div class="empty">Você ainda não pediu para entrar em nenhum grupo.<br>Use a aba Buscar para encontrar vagas.</div>';return}
+    box.innerHTML=state.myRequests.map(r=>{
+      const g=r.group;let extra='';
+      if(r.status==='pending')extra='<button class="btn danger sm" style="width:100%;margin-top:10px" onclick="event.stopPropagation();confirmCancel('+r.id+')">Cancelar solicitação</button>';
       if(r.status==='accepted')extra=
-        '<button class="btn sm" style="width:100%;margin-top:10px" onclick="event.stopPropagation();joinWhats()">Entrar no grupo do WhatsApp</button>'+
-        '<button class="btn danger sm" style="width:100%;margin-top:8px" onclick="event.stopPropagation();confirmCancel('+i+')">Desistir da vaga</button>';
-      return '<div class="card" onclick="openGroup('+g.id+')"><div class="top"><span class="tag">'+g.sport+'</span><span class="status st-'+r.status+'">'+lbl+'</span></div><h3>'+g.name+'</h3><div class="meta">'+g.day+', '+g.time+' · '+g.hood+'</div>'+extra+'</div>';
+        '<button class="btn sm" style="width:100%;margin-top:10px" onclick="event.stopPropagation();joinWhats('+g.id+')">Entrar no grupo do WhatsApp</button>'+
+        '<button class="btn danger sm" style="width:100%;margin-top:8px" onclick="event.stopPropagation();confirmCancel('+r.id+')">Desistir da vaga</button>';
+      return '<div class="card" onclick="openGroup('+g.id+')"><div class="top"><span class="tag">'+esc(g.sport)+'</span><span class="status st-'+r.status+'">'+STATUS_LBL[r.status]+'</span></div>'+
+        '<h3>'+esc(g.name)+'</h3><div class="meta">'+esc(g.day)+', '+hhmm(g.start_time)+' · '+esc(g.hood)+'</div>'+extra+'</div>';
     }).join('');
   }else{
     if(!state.myGroups.length){box.innerHTML='<div class="empty">Você ainda não criou nenhum grupo.<br>Toque em Criar grupo para começar.</div>';return}
-    box.innerHTML=state.myGroups.map(g=>{
-      const pend=g.cands.filter(c=>c.status==='pending').length;
-      return '<div class="card" onclick="openCandidates('+g.id+')"><div class="top"><span class="tag">'+g.sport+'</span><span class="ok">'+g.spots+(g.spots===1?' vaga':' vagas')+'</span></div><h3>'+g.name+'</h3><div class="meta">'+g.day+', '+g.time+' · '+g.hood+'<br><b>'+pend+'</b> candidato(s) aguardando resposta</div>'+statusHtml(g,6)+'<div class="more">Ver candidatos ›</div></div>';
-    }).join('');
+    box.innerHTML=state.myGroups.map(g=>
+      '<div class="card" onclick="openCandidates('+g.id+')"><div class="top"><span class="tag">'+esc(g.sport)+'</span><span class="ok">'+spotsTxt(g.spots_left)+'</span></div>'+
+      '<h3>'+esc(g.name)+(g.listed?'':' <span class="status st-pending">Pausado</span>')+'</h3>'+
+      '<div class="meta">'+esc(g.day)+', '+hhmm(g.start_time)+' · '+esc(g.hood)+'<br><b>'+g.pending+'</b> candidato(s) aguardando resposta</div>'+
+      statusHtml(g,6)+'<div class="more">Ver candidatos ›</div></div>'
+    ).join('');
   }
 }
-function simulate(i,s){
-  const r=state.requests[i];r.status=s;
-  const g=allGroups().find(x=>x.id===r.gid);
-  renderActivity();
-  if(s==='accepted')addNotif('✅','Solicitação aceita','O organizador de '+g.name+' aceitou você. Entre no grupo do WhatsApp.','req');
-  else addNotif('❌','Solicitação recusada','Dessa vez não foi possível entrar em '+g.name+'. Veja outras vagas perto de você.','req');
-}
-function confirmCancel(i){
-  const r=state.requests[i];if(!r)return;
-  const g=allGroups().find(x=>x.id===r.gid);
+function confirmCancel(rid){
+  const r=state.myRequests.find(x=>x.id===rid);if(!r)return;
   const acc=r.status==='accepted';
   modal(acc?'Desistir da vaga?':'Cancelar solicitação?',
-    '<p>'+(acc?'Você sairá de <b>'+g.name+'</b> e sua vaga ficará livre para outra pessoa.':'Sua solicitação para <b>'+g.name+'</b> será removida. Você poderá solicitar de novo depois.')+'</p>'+
-    '<button class="btn danger" onclick="doCancel('+i+')">'+(acc?'Sim, desistir':'Sim, cancelar')+'</button>','Voltar');
+    '<p>'+(acc?'Você sairá de <b>'+esc(r.group.name)+'</b>, perderá o acesso ao link do grupo e sua vaga ficará livre para outra pessoa.':'Sua solicitação para <b>'+esc(r.group.name)+'</b> será removida. Você poderá pedir de novo depois.')+'</p>'+
+    '<button class="btn danger" onclick="doCancel('+rid+')">'+(acc?'Sim, desistir':'Sim, cancelar')+'</button>','Voltar',true);
 }
-function doCancel(i){
-  const r=state.requests[i];if(!r)return;
-  const acc=r.status==='accepted';
-  state.requests.splice(i,1);
-  closeAll();renderActivity();
+async function doCancel(rid){
+  const r=state.myRequests.find(x=>x.id===rid),acc=r&&r.status==='accepted';
+  const {error}=await sb.from('join_requests').delete().eq('id',rid);
+  closeAll();
+  if(error)return toast(dbErr(error));
   toast(acc?'Você desistiu da vaga':'Solicitação cancelada');
-}
-function joinWhats(){
-  modal('Convite liberado','<p>O organizador aceitou você. No produto final, este botão abre o convite da comunidade no WhatsApp.</p><p class="meta">Seu telefone continua oculto para os outros membros até você entrar.</p>');
+  loadActivity();
 }
 
-/* ---------- criar grupo / candidatos ---------- */
-function doPublish(){
-  const err=$('pbErr'),link=$('pbLink').value.trim();
-  if(!$('pbHood').value.trim())return err.textContent='Informe o bairro do local.';
-  if(link&&!/^https:\/\/chat\.whatsapp\.com\/\S+/.test(link))return err.textContent='O link precisa começar com https://chat.whatsapp.com/ ou ficar em branco.';
-  const spots=+$('pbSpots').value;
+/* ---------- criar grupo ---------- */
+let pubCepSeq=0;
+async function onPubCepInput(inp){
+  let v=inp.value.replace(/\D/g,'').slice(0,8);
+  if(v.length>5)v=v.slice(0,5)+'-'+v.slice(5);
+  inp.value=v;
+  const digits=v.replace(/\D/g,''),seq=++pubCepSeq;
+  state.pubAddr=null;$('pbHood').value='';
+  if(digits.length<8)return;
+  $('pbHood').value='Buscando…';
+  const a=await fetchCep(digits);
+  if(seq!==pubCepSeq)return;
+  if(!a){$('pbHood').value='';return toast('CEP não encontrado. Confira os números.')}
+  state.pubAddr=a;$('pbHood').value=a.hood||a.city;
+  if(a.city&&a.city!=='São Paulo')toast('Por enquanto o Quadra Cheia atende só a cidade de São Paulo');
+}
+async function doPublish(){
+  const err=$('pbErr'),name=$('pbName').value.trim(),a=state.pubAddr,link=cleanLink($('pbLink').value);
+  const spots=+$('pbSpots').value,time=$('pbTime').value;
+  if(name.length<3)return err.textContent='Dê um nome ao grupo (mínimo 3 letras).';
+  if(!a||!(a.hood||a.city))return err.textContent='Informe o CEP da quadra e aguarde o bairro aparecer.';
+  if(!time)return err.textContent='Informe o horário.';
   if(!Number.isInteger(spots)||spots<1||spots>20)return err.textContent='Informe de 1 a 20 vagas.';
+  if(link&&!WA_RE.test(link))return err.textContent='O link precisa ser um convite do WhatsApp (https://chat.whatsapp.com/...) ou ficar em branco.';
   err.textContent='';
-  const sport=$('pbSport').value,hood=esc($('pbHood').value.trim());
-  const name=esc($('pbName').value.trim())||(sport+' · '+hood);
-  const confirmed=$('pbConfirmed').checked;
-  const id=100+state.myGroups.length+1;
-  state.myGroups.push({
-    /* PENDENTE (problema 5): distância fixa em 1,0 km; calcular a partir do endereço do usuário. Corrigir só quando for pedido. */
-    id,sport,name,hood,km:1.0,day:$('pbDay').value,time:$('pbTime').value,
-    level:$('pbLevel').value,spots:+$('pbSpots').value,cost:esc($('pbCost').value.trim())||'A combinar',
-    confirmed,active:'Partida confirmada agora',org:esc(state.user.name)||'Você',rules:'Combinado com o organizador.',listed:true,link:link,
-    cands:[
-      {name:'Mariana A.',sport,level:'Iniciante',hood:'Vila Mariana',verified:true,status:'pending',
-       availability:'Sábados pela manhã',experience:'Jogou na faculdade e está retomando a prática.',message:'Procuro uma turma acolhedora para voltar a jogar.',photo:null},
-      {name:'Thiago P.',sport,level:'Intermediário',hood:'Paraíso',verified:true,status:'pending',
-       availability:'Quartas à noite',experience:'Joga há dois anos e participa de partidas semanais.',message:'Tenho disponibilidade para jogar toda quarta-feira.',photo:null},
-      {name:'Juliana K.',sport,level:'Iniciante',hood:'Moema',verified:false,status:'pending',
-       availability:'Terças e quintas à noite',experience:'Começou a praticar recentemente.',message:'Gostaria de conhecer o grupo antes de confirmar.',photo:null}
-    ]
+  await busy('pbBtn',async()=>{
+    const row={organizer_id:state.user.id,name,sport:$('pbSport').value,hood:(a.hood||a.city).slice(0,60),lat:a.lat,lng:a.lng,
+      day:$('pbDay').value,start_time:time,level:$('pbLevel').value,format:$('pbFormat').value,spots,
+      cost:$('pbCost').value.trim()||'A combinar',rules:$('pbRules').value.trim()||null,
+      confirmed_at:$('pbConfirmed').checked?new Date().toISOString():null};
+    const {data,error}=await sb.from('groups').insert(row).select('id').single();
+    if(error)return err.textContent=dbErr(error,'Não foi possível criar o grupo. Confira os campos.');
+    if(link){
+      const r=await sb.from('group_secrets').insert({group_id:data.id,whatsapp_link:link});
+      if(r.error)toast('Grupo criado, mas o link não foi salvo. Adicione em Meus grupos.');
+    }
+    ['pbName','pbCep','pbHood','pbCost','pbRules','pbLink'].forEach(i=>$(i).value='');
+    $('pbConfirmed').checked=false;state.pubAddr=null;
+    toast('Grupo criado');state.tab='mine';go('activity');
   });
-  $('pbName').value='';$('pbConfirmed').checked=false;
-  state.tab='mine';toast('Grupo criado');go('activity');
-  setTimeout(()=>addNotif('🙋','Novos candidatos','3 pessoas pediram para entrar em '+name+'.','mine'),3500);
 }
-function openCandidates(id){
-  state.currentMine=state.myGroups.find(x=>x.id===id);renderCandidates();go('candidates');
+
+/* ---------- painel do organizador ---------- */
+async function openCandidates(id){
+  state.currentMine=state.myGroups.find(x=>x.id===id);if(!state.currentMine)return;
+  state.cands=[];$('candidates').innerHTML='<div class="empty">Carregando candidatos…</div>';
+  go('candidates');await loadCandidates();
 }
-function toggleConfirmed(){
-  const g=state.currentMine;g.confirmed=!g.confirmed;
-  if(g.confirmed)g.active='Partida confirmada agora';
-  toast(g.confirmed?'Partida marcada como confirmada':'Confirmação removida');
+async function loadCandidates(){
+  const g=state.currentMine;
+  const [c,s,f]=await Promise.all([
+    sb.from('join_requests').select('id,status,message,created_at,user:profiles(id,name,hood,days,periods,profile_sports(sport,level))').eq('group_id',g.id).order('created_at'),
+    sb.from('group_secrets').select('whatsapp_link').eq('group_id',g.id).maybeSingle(),
+    sb.from('groups').select('spots_left,confirmed_at,listed').eq('id',g.id).maybeSingle()
+  ]);
+  if(c.error)return $('candidates').innerHTML='<div class="empty">Não foi possível carregar os candidatos.<br>'+esc(dbErr(c.error))+'</div>';
+  state.cands=(c.data||[]).filter(r=>r.user);
+  g.link=s.data?s.data.whatsapp_link:'';
+  if(f.data)Object.assign(g,f.data);
   renderCandidates();
 }
+const shortDays=a=>(a||[]).map(d=>DAYS_SHORT[d]||d).join(', ');
+function candLevel(c,sport){const m=(c.user.profile_sports||[]).find(x=>x.sport===sport);return m?m.level:'nível não informado'}
 function renderCandidates(){
-  const g=state.currentMine;
-  $('candidates').innerHTML='<h2>'+g.name+'</h2><p class="sub" style="margin-bottom:6px">'+g.day+', '+g.time+' · '+g.spots+(g.spots===1?' vaga':' vagas')+'</p>'+
-  statusHtml(g,0)+
-  '<button class="btn sec sm" style="width:100%;margin:12px 0 16px" onclick="toggleConfirmed()">'+(g.confirmed?'Desmarcar partida confirmada':'Marcar partida como confirmada')+'</button>'+
-  g.cands.map((c,i)=>{
-    let act='';
-    if(c.status==='pending')act='<div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm" style="flex:1" onclick="event.stopPropagation();decide('+i+',\'accepted\')">Aceitar</button><button class="btn sec sm" style="flex:1" onclick="event.stopPropagation();decide('+i+',\'declined\')">Recusar</button></div>';
-    else if(c.status==='accepted')act='<button class="btn sm" style="margin-top:10px;width:100%" onclick="event.stopPropagation();invite('+i+')">Convidar para o WhatsApp</button>';
-    const lbl={pending:'Aguardando',accepted:'Aceito',declined:'Recusado'}[c.status];
-    return '<div class="card" onclick="viewCandidate('+i+')"><div class="top"><h3>'+c.name+'</h3><span class="status st-'+c.status+'">'+lbl+'</span></div>'+
-      '<div class="meta">'+c.sport+' · '+c.level+'<br>Região: '+c.hood+'<br>'+(c.verified?'<span class="badge">✔ Perfil verificado</span>':'Verificação pendente')+' · Telefone oculto</div>'+
-      '<div class="more">Ver perfil completo ›</div>'+
-      act+
-      '<button class="link" style="display:block;margin:10px auto 0" onclick="event.stopPropagation();openReport()">Denunciar ou bloquear</button></div>';
-  }).join('');
+  const g=state.currentMine,act=activityOf(g);
+  const pend=state.cands.filter(c=>c.status==='pending'),rest=state.cands.filter(c=>c.status!=='pending');
+  const card=c=>{
+    const i=state.cands.indexOf(c);let btns='';
+    if(c.status==='pending')btns='<div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm" style="flex:1" onclick="event.stopPropagation();decide('+c.id+',\'accepted\')">Aceitar</button><button class="btn sec sm" style="flex:1" onclick="event.stopPropagation();decide('+c.id+',\'declined\')">Recusar</button></div>';
+    else if(c.status==='accepted')btns='<div class="meta" style="margin-top:8px">'+(g.link?'Já tem acesso ao link da comunidade.':'Adicione o link da comunidade abaixo para liberar o acesso.')+'</div>';
+    return '<div class="card" onclick="viewCandidate('+i+')"><div class="top"><h3>'+esc(c.user.name)+'</h3><span class="status st-'+c.status+'">'+STATUS_LBL[c.status]+'</span></div>'+
+      '<div class="meta">'+esc(g.sport)+' · '+esc(candLevel(c,g.sport))+'<br>Região: '+esc(c.user.hood||'não informada')+'<br>Disponível: '+esc(shortDays(c.user.days)||'não informado')+(c.user.periods&&c.user.periods.length?' · '+esc(c.user.periods.join(', ')):'')+'<br><span class="badge">✔ E-mail verificado</span></div>'+
+      (c.message?'<div class="note" style="margin-top:8px">“'+esc(c.message)+'”</div>':'')+
+      btns+'<button class="link" style="display:block;margin:10px auto 0" onclick="event.stopPropagation();openReport(\''+c.user.id+'\','+g.id+',\'candidato\')">Denunciar ou bloquear</button></div>';
+  };
+  $('candidates').innerHTML='<h2>'+esc(g.name)+'</h2><p class="sub" style="margin-bottom:6px">'+esc(g.day)+', '+hhmm(g.start_time)+' · '+spotsTxt(g.spots_left)+' de '+g.spots+'</p>'+
+    statusHtml(g,0)+
+    '<button class="btn sec sm" style="width:100%;margin:12px 0 4px" onclick="toggleConfirmed()">'+(act.ok?'Remover confirmação da partida':'Confirmar partida desta semana')+'</button>'+
+    '<div class="note">Confirmar a partida mostra a quem busca que o grupo está ativo.</div>'+
+    '<label for="cdLink">Link da comunidade no WhatsApp</label><div style="display:flex;gap:8px"><input id="cdLink" placeholder="https://chat.whatsapp.com/..." autocapitalize="none" value="'+esc(g.link||'')+'"><button class="btn sm" onclick="saveLink()">Salvar</button></div>'+
+    '<div class="note">Só quem você aceitar consegue ver este link.</div>'+
+    '<label style="margin-top:18px">Candidatos aguardando ('+pend.length+')</label>'+
+    (pend.length?pend.map(card).join(''):'<div class="meta" style="margin-bottom:10px">Ninguém aguardando resposta agora.</div>')+
+    (rest.length?'<label>Já respondidos ('+rest.length+')</label>'+rest.map(card).join(''):'')+
+    '<button class="btn sec" onclick="toggleListed()">'+(g.listed?'Pausar grupo (sai da busca)':'Reabrir grupo na busca')+'</button>'+
+    '<button class="btn danger" onclick="confirmDeleteGroup()">Excluir grupo</button>';
 }
 function viewCandidate(i){
-  const c=state.currentMine.cands[i];
-  const photo=c.photo
-    ?'<img src="'+c.photo+'" alt="Foto de '+c.name+'" style="width:76px;height:76px;border-radius:50%;object-fit:cover">'
-    :'<div class="photo" style="width:76px;height:76px;font-size:24px;margin:0 auto;cursor:default">📷</div>';
-  const ver=c.verified?'<span class="badge">✔ Perfil verificado</span>':'<span class="meta">Verificação pendente</span>';
-  const lbl={pending:'Aguardando',accepted:'Aceito',declined:'Recusado'}[c.status];
-  let act='';
-  if(c.status==='pending')act='<div style="display:flex;gap:8px;margin-top:14px"><button class="btn sm" style="flex:1" onclick="decide('+i+',\'accepted\')">Aceitar</button><button class="btn sec sm" style="flex:1" onclick="decide('+i+',\'declined\')">Recusar</button></div>';
-  else if(c.status==='accepted')act='<button class="btn sm" style="width:100%;margin-top:14px" onclick="invite('+i+')">Convidar para o WhatsApp</button>';
-  modal('Perfil de '+c.name,
-    '<div style="text-align:center;margin-bottom:12px">'+photo+'<div style="margin-top:8px;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap">'+ver+'<span class="status st-'+c.status+'">'+lbl+'</span></div></div>'+
+  const c=state.cands[i],g=state.currentMine;if(!c)return;
+  modal('Perfil de '+esc(c.user.name),
+    '<div style="text-align:center;margin-bottom:12px"><span class="badge">✔ E-mail verificado</span> <span class="status st-'+c.status+'">'+STATUS_LBL[c.status]+'</span></div>'+
     '<div class="info-grid">'+
-      '<div><b>Modalidade</b>'+c.sport+'</div>'+
-      '<div><b>Nível</b>'+c.level+'</div>'+
-      '<div><b>Região</b>'+c.hood+'</div>'+
-      '<div><b>Disponibilidade</b>'+c.availability+'</div>'+
+      '<div><b>'+esc(g.sport)+'</b>'+esc(candLevel(c,g.sport))+'</div>'+
+      '<div><b>Região</b>'+esc(c.user.hood||'não informada')+'</div>'+
+      '<div><b>Dias</b>'+esc(shortDays(c.user.days)||'—')+'</div>'+
+      '<div><b>Períodos</b>'+esc((c.user.periods||[]).join(', ')||'—')+'</div>'+
     '</div>'+
-    '<p><strong>Experiência</strong><br>'+c.experience+'</p>'+
-    '<p><strong>Mensagem para o organizador</strong><br>'+c.message+'</p>'+
-    '<div class="note">O telefone permanece oculto até o aceite do organizador.</div>'+
-    act,'Fechar',true);
+    '<p><strong>Outras modalidades</strong><br>'+esc((c.user.profile_sports||[]).filter(m=>m.sport!==g.sport).map(m=>m.sport+' ('+m.level+')').join(', ')||'Nenhuma')+'</p>'+
+    (c.message?'<p><strong>Mensagem para o organizador</strong><br>'+esc(c.message)+'</p>':'')+
+    '<div class="note">O e-mail da pessoa não é exibido. O contato acontece pela comunidade do WhatsApp após o aceite.</div>'+
+    (c.status==='pending'?'<div style="display:flex;gap:8px;margin-top:14px"><button class="btn sm" style="flex:1" onclick="decide('+c.id+',\'accepted\')">Aceitar</button><button class="btn sec sm" style="flex:1" onclick="decide('+c.id+',\'declined\')">Recusar</button></div>':''),
+    'Fechar',true);
 }
-function decide(i,s){
-  state.currentMine.cands[i].status=s;
+async function decide(rid,s){
   closeAll();
-  toast(s==='accepted'?'Candidato aceito':'Candidato recusado');
-  renderCandidates();
+  const {error}=await sb.from('join_requests').update({status:s}).eq('id',rid);
+  if(error)return toast(dbErr(error));
+  toast(s==='accepted'?'Candidato aceito. O link do grupo foi liberado para ele.':'Candidato recusado');
+  await loadCandidates();refreshNotifs();
 }
-function invite(i){
-  const c=state.currentMine.cands[i],g=state.currentMine;
-  if(!g.link)return modal('Link não cadastrado','<p>Você não adicionou o link da comunidade ao criar este grupo. Nesta versão do protótipo, o convite só é enviado quando há um link.</p>');
-  modal('Convite enviado','<p>'+c.name+' recebeu o link da comunidade no WhatsApp.</p><p class="meta">O link só é liberado depois do seu aceite.</p>');
+async function saveLink(){
+  const g=state.currentMine,link=cleanLink($('cdLink').value);
+  if(link&&!WA_RE.test(link))return toast('Use um convite do WhatsApp: https://chat.whatsapp.com/...');
+  const {error}=link
+    ?await sb.from('group_secrets').upsert({group_id:g.id,whatsapp_link:link})
+    :await sb.from('group_secrets').delete().eq('group_id',g.id);
+  if(error)return toast(dbErr(error));
+  g.link=link;toast(link?'Link salvo':'Link removido');renderCandidates();
+}
+async function toggleConfirmed(){
+  const g=state.currentMine,v=activityOf(g).ok?null:new Date().toISOString();
+  const {error}=await sb.from('groups').update({confirmed_at:v}).eq('id',g.id);
+  if(error)return toast(dbErr(error));
+  g.confirmed_at=v;toast(v?'Partida marcada como confirmada':'Confirmação removida');renderCandidates();
+}
+async function toggleListed(){
+  const g=state.currentMine,v=!g.listed;
+  const {error}=await sb.from('groups').update({listed:v}).eq('id',g.id);
+  if(error)return toast(dbErr(error));
+  g.listed=v;toast(v?'Grupo de volta na busca':'Grupo pausado: não aparece mais na busca');renderCandidates();
+}
+function confirmDeleteGroup(){
+  modal('Excluir grupo?','<p>O grupo <b>'+esc(state.currentMine.name)+'</b> e todas as solicitações dele serão apagados. Isso não pode ser desfeito.</p>'+
+    '<button class="btn danger" onclick="deleteGroup()">Sim, excluir</button>','Voltar',true);
+}
+async function deleteGroup(){
+  const {error}=await sb.from('groups').delete().eq('id',state.currentMine.id);
+  closeAll();
+  if(error)return toast(dbErr(error));
+  toast('Grupo excluído');state.tab='mine';go('activity');
 }
 
-/* init */
-renderSportChips();renderMs();renderMods();go('welcome');
+/* init: se já existe sessão salva neste navegador, entra direto */
+renderSportChips();renderMs();renderMods();renderAvail();
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(session)await afterLogin();else go('welcome');
+})();
+/* confere novidades a cada 30 s enquanto o app está aberto */
+setInterval(()=>{if(state.logged&&!document.hidden)refreshNotifs()},30000);
 </script>
 </body>
 </html>

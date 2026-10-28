@@ -14,8 +14,10 @@ Protótipo de web app para encontrar grupos e partidas esportivas. Tudo em portu
 - `app.html` é gerado com `python3 gerar-app.py` e publicado como Artifact em https://claude.ai/artifact/4ytZnF9rNq3XjJXBvN4sRg (republicar no mesmo link a cada mudança).
 - `PENDENCIAS.md` lista problemas conhecidos.
 
-## Pendência que só se corrige quando for pedido
-- **Problema 5:** a distância de grupos criados é fixa em 1,0 km (`PENDENTE (problema 5)` no `index.html`). Não corrigir até o dono do projeto pedir; lembrar dela quando fizer sentido.
+## Banco e testes
+- `supabase/schema.sql` é o banco completo; mudanças em banco já em uso vão também num arquivo numerado (`supabase/00N_*.sql`) para o dono rodar no SQL Editor.
+- Antes de cada commit, rodar os testes de `testes/` (ver README) e manter todos passando.
+- Problema 5 (distância falsa) foi resolvido em 28/10/2026 a pedido do dono do projeto.
 
 ## Regra de commits (janela de 5 horas)
 - A `main` recebe no máximo um commit por janela de 5 horas.
