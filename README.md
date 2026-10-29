@@ -14,6 +14,8 @@ Quem procura jogo pede para entrar num grupo. O organizador aceita ou recusa, e 
 | `supabase/schema.sql` | Banco completo: tabelas, regras de acesso (RLS), gatilhos. Para projeto novo. |
 | `supabase/002_vagas_restantes.sql` | Atualização para quem já tinha rodado a primeira versão do `schema.sql`. |
 | `supabase/demo.sql` | Dados de demonstração (perfis, 10 grupos, solicitações) para o avaliador e o vídeo. |
+| `supabase/metricas.sql` | Consultas das métricas de validação da Fase 2 (só leitura). |
+| `supabase/teste-volume.sql` | Cria e apaga 300 grupos fictícios para medir a busca. |
 | `testes/` | Testes automáticos (ver abaixo). |
 | `app.html` | Protótipo v1 publicado como Artifact no Claude, usado na rodada 1 de testes de usabilidade. |
 | `gerar-app.py` | Gera o `app.html` a partir do `index.html`. |
